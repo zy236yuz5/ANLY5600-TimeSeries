@@ -1,0 +1,31 @@
+project:
+  type: website
+
+website:
+  title: "Time Series          sfdsasdasd"
+  navbar:
+    left:
+      
+      - about.qmd
+      
+      - Introduction.qmd
+      - DataSources.qmd
+      - DataVis.qmd
+      - EDA.qmd
+      - ARModels.qmd
+      - ASV.qmd
+      - SAF.qmd
+      - GARCH.qmd
+      - TS.qmd
+      - conclusion.qmd
+      
+      
+
+format:
+  html:
+    theme: sandstone
+    css: ./styles/layout.css
+    toc: true
+
+
+

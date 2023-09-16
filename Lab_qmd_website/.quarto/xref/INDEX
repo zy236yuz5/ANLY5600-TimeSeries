@@ -1,0 +1,47 @@
+{
+  "index.qmd": {
+    "index.html": "65019aa8"
+  },
+  "about.qmd": {
+    "about.html": "f3ab14ef"
+  },
+  "ARCH/GARCH.qmd": {
+    "GARCH.html": "2b14be78"
+  },
+  "ARCH/TS.qmd": {
+    "TS.html": "b1e0788c"
+  },
+  "ARModels.qmd": {
+    "ARModels.html": "4293a0e9"
+  },
+  "ASV.qmd": {
+    "ASV.html": "b9c8d391"
+  },
+  "conclusion.qmd": {
+    "conclusion.html": "1d1d1c40"
+  },
+  "DataSources.qmd": {
+    "DataSources.html": "2d216db6"
+  },
+  "DataVis.qmd": {
+    "DataVis.html": "80916ded"
+  },
+  "EDA.qmd": {
+    "EDA.html": "eabc6ef8"
+  },
+  "Introduction.qmd": {
+    "Introduction.html": "2b89835b"
+  },
+  "SAF.qmd": {
+    "SAF.html": "f9b43ae6"
+  },
+  "GARCH.qmd": {
+    "GARCH.html": "fee9675e"
+  },
+  "TS.qmd": {
+    "TS.html": "90efb7a0"
+  },
+  "dv.qmd": {
+    "dv.html": "c2badbd3"
+  }
+}

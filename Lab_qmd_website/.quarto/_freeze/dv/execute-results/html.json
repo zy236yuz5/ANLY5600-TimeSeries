@@ -1,0 +1,16 @@
+{
+  "hash": "176de3f3d19dbb73fc7ca899d13c8ff3",
+  "result": {
+    "markdown": "---\ntitle: \"Data Vizes in TS\"\nnavbar:\n    left:\n      - href: \n      - about.qmd\n      \n      - Introduction.qmd\n      - DataSources.qmd\n      - DataVis.qmd\n      - EDA.qmd\n      - ARModels.qmd\n      - ASV.qmd\n      - SAF.qmd\n      - GARCH.qmd\n      - TS.qmd\n      - conclusion.qmd\n      - dv.qmd\n\nformat:\n  html:\n    theme: sandstone\n    css: ./styles/layout.css\n    toc: true\n---\n\n\nAuthor: Zonghong Yu\n\n# Lab 1 \n\n## Question 2\n\n### 1. Try to reproduce the Data Vizes similar to in Lab0/1 “Data Viz Examples” but with a different set of stock prices. (use the quantmod package to get stock prices from yahoo finance https://finance.yahoo.com/lookup/)\n#### a. \nIn here, I utilize three different set of stock prices: GOOGL, MSFT - Microsoft Corporation, and NFLX - Netflix Inc. \n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n::: {.cell-output-display}\n![](dv_files/figure-html/unnamed-chunk-4-1.png){width=672}\n:::\n:::\n\n\nInterpretations:\nThe three stocks as showned in figure above represent:Google, MicroSoft, and Netflix. We can see that in general, Netflix had an overall highiest stock prices throughout the years. And Google has the least over the years. However, all three of them had fluctuations especially in year 2022, which could be the impact of the Covid-19.\n\n#### b. Plot the climate data (climate.csv) using plotly. https://plotly.com/r/\n\n<iframe src=\"./Visulizations/lab1/max_temperature_plot.html\" width=\"800\" height=\"600\"></iframe>\n\nInterpretations:\nBy using the plotly on the climate dataset provided, we can see some interesting features. From above interaction figure, we can see the relation between the Date and the max temperature.  We can see that during July and August in 2021, the max temperature is higher in general while lower during October and December which is reasonable.\n\n\n#### c. Get any economic data / macroeconomic indicators and plot using plotly https://fred.stlouisfed.org/ https://www.bea.gov/\n\nI utilized the GEPUCURRENT dataset, which is Global Economic Policy Uncertainty Index: Current Price Adjusted GDP, from https://fred.stlouisfed.org/series/GEPUCURRENT\n\n<iframe src=\"./Visulizations/lab1/economic.html\" width=\"800\" height=\"600\"></iframe>\n\nInterpretations:\nBy using the plotly on the economic dataset from the website givem, I chose the GDP index of some global economic policy. From above interaction figure, we can see the relation between the Date and the index.  We can see that the index follows an upwarding trend throughout the years. However, there are many local maximums and fluctuations throughout the years. In addition, the idex reached at its peak on 2020/05/01. \n\n### 2. Make only the plots visible in your webpage. (set echo=FALSE in your R code chunck)\n  Only plots visible as required.\n\n\n### 3. Add interpretations to all the plots in the webpage.\n   \n   Added as required.",
+    "supporting": [
+      "dv_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

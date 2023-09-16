@@ -1,0 +1,27 @@
+---
+title: "Spectral Analysis and Filtering"
+navbar:
+    left:
+      - href: 
+      - about.qmd
+      
+      - Introduction.qmd
+      - DataSources.qmd
+      - DataVis.qmd
+      - EDA.qmd
+      - ARModels.qmd
+      - ASV.qmd
+      - SAF.qmd
+      - GARCH.qmd
+      - TS.qmd
+      - conclusion.qmd
+      - dv.qmd
+
+format:
+  html:
+    theme: sandstone
+    css: ./styles/layout.css
+    toc: true
+---
+
+work in progress

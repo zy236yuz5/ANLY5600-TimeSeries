@@ -1,0 +1,128 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Time Series",
+    "section": "",
+    "text": "Author: Zonghong Yu\nNetID: zy236\nEmail: zy236@georgetown.edu"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "ABOUT ME",
+    "section": "",
+    "text": "Author: Zonghong Yu\nNetID: zy236\nEmail: zy236@georgetown.edu"
+  },
+  {
+    "objectID": "ARCH/GARCH.html",
+    "href": "ARCH/GARCH.html",
+    "title": "Financial Time Series Models (ARCH/GARCH)",
+    "section": "",
+    "text": "Work in prorgess"
+  },
+  {
+    "objectID": "ARCH/TS.html",
+    "href": "ARCH/TS.html",
+    "title": "Deep Learning for TS",
+    "section": "",
+    "text": "Work in prorgess"
+  },
+  {
+    "objectID": "ARModels.html",
+    "href": "ARModels.html",
+    "title": "ARMA/ARIMA/SARIMA Models",
+    "section": "",
+    "text": "work in progress"
+  },
+  {
+    "objectID": "ASV.html",
+    "href": "ASV.html",
+    "title": "ARIMAX/SARIMAX/VAR",
+    "section": "",
+    "text": "work in progress"
+  },
+  {
+    "objectID": "conclusion.html",
+    "href": "conclusion.html",
+    "title": "Conclusions",
+    "section": "",
+    "text": "work in progress"
+  },
+  {
+    "objectID": "DataSources.html",
+    "href": "DataSources.html",
+    "title": "Data Sources",
+    "section": "",
+    "text": "work in progress"
+  },
+  {
+    "objectID": "DataVis.html",
+    "href": "DataVis.html",
+    "title": "Data Visualization",
+    "section": "",
+    "text": "work in progress"
+  },
+  {
+    "objectID": "EDA.html",
+    "href": "EDA.html",
+    "title": "Exploratory Data Analysis",
+    "section": "",
+    "text": "work in progress"
+  },
+  {
+    "objectID": "Introduction.html",
+    "href": "Introduction.html",
+    "title": "Introduction",
+    "section": "",
+    "text": "The Impact of Income Disparities and Housing Affordability in the United States\n\nProject Backgroung:\nWith the dramatic development of the technology and society, we have witnessed the continuous increasing in economies. However, such developments did not spread through every corner in USA. The disparities of resources still exist. There are housing price disparities, rental sales disparities, and income disparities for different regions and states. These differents play a very crucial role in our society and they bring huge impact and massive pressure to people nowadays.\nThe central focus of this project lies in understanding the relationship between the income disparities between and housing affordability in the United States. I aim to help us understand and gain new insights on how varying income levels within society directly affect the ability of individuals and families to secure housing that is both suitable and affordable. Throughout the analysis, different smaller aspects and factors will be analyzed one by one. \n\n\nThe Big Picture & Literature Review:\nIncome disparity and housing affordability are not just matters of individual but also broader societal concerns that need to be attended to. The influences of such disparities and results are not only the quality of life for countless Americans citizens but also the overall stability of communities and the economic health of the nation. As I help us explore this issue, we must recognize that it’s not simply about monetary figures; it’s about the pursuit of a fundamental human need: shelter and how income inequality, housing price, rental price, GDP, personal saveing and regional difference influence us as a whole in the United States.\nIn order to bring a more comprehensive understanding of this topic, we must delve into the body of research and discourse that precedes us. Existing literature reveals the persistent challenge of housing affordability, marked by the growing gap between incomes and housing costs.(Jajtner et al., 2020). Scholars have examined the historical trends, policy interventions, and socioeconomic factors. In this exploration of the impact of income disparities on housing affordability, we will adopt multiple analytical angles to provide a well-rounded perspective.\n\nMutiple datasets are analyzed thoroughly to provide insights and conclusions. Different methods such as Exploratory Data Analysis, ARMA Models, ARIMAX Models, Spectral Analysis and Filtering,, Financial Time Series Models, and Deep Learning methods are conducted to help me achieve the goal.\n\n\nGuiding Questions that need to be answered:\nTo guide the explorations, we have conducted some questions that would be answered using different analysis and dataset:\n\nHow have income inequality trends in the United States impacted the individuals?\nWhat are the historical trends in housing prices?\nWhat is the definition of housing affordability, and what metrics are commonly used to assess it?\nHow do income disparities vary from one region to another?\nWhat regions or states have greater disparities?\nWhat impact have the economy had on the housing market?\nIs there any trends or seasonal patterns regarding the income and housing price?\nIn what ways does housing affordability intersect with broader economic and social issues, such as workforce mobility and education outcomes?\nWhat innovative solutions and strategies can be employed to improve housing affordability for all Americans?\nWhat are the correlations between the sale price, housing price, and rental price?\nWhat future trends should we anticipate in the context of income disparities and housing affordability?\nHow can addressing income disparities lead to a more equitable and sustainable housing market in the United States?\n\nThese guiding questions will serve as different milestones throughout this exploration. The questions might be changed and increased as the project proceeds."
+  },
+  {
+    "objectID": "SAF.html",
+    "href": "SAF.html",
+    "title": "Spectral Analysis and Filtering",
+    "section": "",
+    "text": "work in progress"
+  },
+  {
+    "objectID": "GARCH.html",
+    "href": "GARCH.html",
+    "title": "Financial Time Series Models (ARCH/GARCH)",
+    "section": "",
+    "text": "Work in prorgess"
+  },
+  {
+    "objectID": "TS.html",
+    "href": "TS.html",
+    "title": "Deep Learning for TS",
+    "section": "",
+    "text": "Work in prorgess"
+  },
+  {
+    "objectID": "dv.html",
+    "href": "dv.html",
+    "title": "Data Vizes in TS",
+    "section": "",
+    "text": "Author: Zonghong Yu"
+  },
+  {
+    "objectID": "dv.html#question-2",
+    "href": "dv.html#question-2",
+    "title": "Data Vizes in TS",
+    "section": "Question 2",
+    "text": "Question 2\n\n1. Try to reproduce the Data Vizes similar to in Lab0/1 “Data Viz Examples” but with a different set of stock prices. (use the quantmod package to get stock prices from yahoo finance https://finance.yahoo.com/lookup/)\n\na.\nIn here, I utilize three different set of stock prices: GOOGL, MSFT - Microsoft Corporation, and NFLX - Netflix Inc. \n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInterpretations: The three stocks as showned in figure above represent:Google, MicroSoft, and Netflix. We can see that in general, Netflix had an overall highiest stock prices throughout the years. And Google has the least over the years. However, all three of them had fluctuations especially in year 2022, which could be the impact of the Covid-19.\n\n\nb. Plot the climate data (climate.csv) using plotly. https://plotly.com/r/\n\n\nInterpretations: By using the plotly on the climate dataset provided, we can see some interesting features. From above interaction figure, we can see the relation between the Date and the max temperature. We can see that during July and August in 2021, the max temperature is higher in general while lower during October and December which is reasonable.\n\n\nc. Get any economic data / macroeconomic indicators and plot using plotly https://fred.stlouisfed.org/ https://www.bea.gov/\nI utilized the GEPUCURRENT dataset, which is Global Economic Policy Uncertainty Index: Current Price Adjusted GDP, from https://fred.stlouisfed.org/series/GEPUCURRENT\n\n\nInterpretations: By using the plotly on the economic dataset from the website givem, I chose the GDP index of some global economic policy. From above interaction figure, we can see the relation between the Date and the index. We can see that the index follows an upwarding trend throughout the years. However, there are many local maximums and fluctuations throughout the years. In addition, the idex reached at its peak on 2020/05/01.\n\n\n\n2. Make only the plots visible in your webpage. (set echo=FALSE in your R code chunck)\nOnly plots visible as required.\n\n\n3. Add interpretations to all the plots in the webpage.\nAdded as required."
+  },
+  {
+    "objectID": "about.html#major-subjects-that-zonghong-interests-in-or-wants-to-explore",
+    "href": "about.html#major-subjects-that-zonghong-interests-in-or-wants-to-explore",
+    "title": "ABOUT ME",
+    "section": "Major Subjects that Zonghong interests in or wants to explore:",
+    "text": "Major Subjects that Zonghong interests in or wants to explore:\n\nPython, RStudio\nData Science, Math, Time Series, Programming\nFinance, Quantitative Engineering\nData Visulization"
+  },
+  {
+    "objectID": "index.html#major-subjects-that-zonghong-interests-in-or-wants-to-explore",
+    "href": "index.html#major-subjects-that-zonghong-interests-in-or-wants-to-explore",
+    "title": "Time Series",
+    "section": "Major Subjects that Zonghong interests in or wants to explore:",
+    "text": "Major Subjects that Zonghong interests in or wants to explore:\n\nPython, RStudio\nData Science, Math, Time Series, Programming\nFinance, Quantitative Engineering\nData Visulization"
+  }
+]

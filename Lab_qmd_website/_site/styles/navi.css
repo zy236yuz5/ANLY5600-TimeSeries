@@ -1,0 +1,22 @@
+@charset "utf-8";
+/*
+Template Name: Realistic
+Author: <a href="http://www.os-templates.com/">OS Templates</a>
+Author URI: http://www.os-templates.com/
+Licence: Free to use under our free template licence terms
+Licence URI: http://www.os-templates.com/template-terms
+File: Navigation CSS
+*/
+
+
+
+nav {
+    position: fixed;
+    
+    right: 20;
+    top: 20;
+    height: 100%;
+    width: 140px;
+    background-color: #E0E0E0;
+    z-index: 999;
+  }

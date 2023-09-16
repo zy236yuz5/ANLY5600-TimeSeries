@@ -1,0 +1,332 @@
+---
+title: "ANLY560 Lab-0/1 Assignment"
+author: "Dr.Purna Gamage, modified by Zonghong Yu"
+date: "2023-09-10"
+output: rmdformats::material
+   
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+#install.packages("kaleido")
+```
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(xts)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+```
+
+
+# Quarto
+
+1. Follow the steps indicated here
+<https://quarto.org/docs/websites/>
+
+2. More themes
+<https://quarto.org/docs/output-formats/html-themes.html>
+
+3. Add your folder to the public html in Georgetown domain and call it within the domain. 
+(watch the lecture recording for more details - also Lab Q4)
+
+#  Lab Question 1
+
+1. First follow above step 1 to open a Quarto Website.
+<https://quarto.org/docs/websites/>
+
+2. Add these tabs as shown in class. (you have to create a `.qmd` file for each page)
+
+  - About You   (You can name this one anyway you wish, All other names below cannot be changed.
+  - Introduction
+  - Data Sources
+  - Data Visualization
+  - Exploratory Data Analysis
+  - ARMA/ARIMA/SARIMA Models
+  - ARIMAX/SARIMAX/VAR 
+  - Spectral Analysis and Filtering(Optional)
+  - Financial Time Series Models (ARCH/GARCH)
+  - Deep Learning for TS
+  - Conclusions
+  
+  b. Use a different theme than mine.
+More themes can be found here.
+<https://quarto.org/docs/output-formats/html-themes.html>
+
+  
+3. Add this text into the Home page.
+
+  
+  a.  Add these text into the Home page and name that page (the title of the page) as "Time Series".
+  
+  
+Q1:
+  https://zy236.georgetown.domains/Lab_qmd_website/_site/index.html
+  
+
+
+#  Lab Question 2
+
+let's insert a new qmd file named as "dv.qmd" (go to `Files` -> `New Files`-> `Quarto Document`) an add the following Data Vizes to that page. Make the title as "Data Vizes in TS".
+
+However please remember to take it down at the end of the semester if you don't need that page on your website.
+
+  1.  Try to reproduce the Data Vizes similar to in Lab0/1 "Data Viz Examples" but with a  
+        a. **different set of stock prices.** (use the `quantmod` package to get stock prices             from yahoo finance <https://finance.yahoo.com/lookup/>)
+        b. Plot the climate data (`climate.csv`) using plotly.
+        <https://plotly.com/r/>
+        c. Get any economic data / macroeconomic indicators and plot using plotly
+            <https://fred.stlouisfed.org/>
+            <https://www.bea.gov/>
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+library(tidyverse)
+library(quantmod)
+```
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+options("getSymbols.warning4.0"=FALSE)
+options("getSymbols.yahoo.warning"=FALSE)
+tickers = c("QQQ" )
+for (i in tickers){
+  getSymbols(i,
+             from = "2020-10-01",
+             to = "2022-12-01")}
+
+x <- list(
+  title = "date"
+)
+y <- list(
+  title = "value"
+)
+
+stock <- data.frame(QQQ$QQQ.Adjusted)
+
+
+stock <- data.frame(stock,rownames(stock))
+colnames(stock) <- append(tickers,'Dates')
+```
+
+```{r, echo=FALSE}
+stock$date<-as.Date(stock$Dates,"%Y-%m-%d")
+ggplot(stock, aes(x=date)) +
+  geom_line(aes(y=QQQ, colour="QQQ"))+
+  
+   labs(
+    title = "Stock Prices for the Invesco QQQ Trust (QQQ)",
+    subtitle = "From 2020-2022",
+    x = "Date",
+    y = "Adjusted Closing Prices")+
+    theme(panel.background = element_rect(fill = "#e8e4e4", colour = "#e8e4e4"))+
+    guides(colour=guide_legend(title="Invesco QQQ")) 
+```
+```{r}
+# Calculate 20-day and 50-day moving averages
+QQQ$SMA20 <- SMA(QQQ$QQQ.Close, n = 20)
+QQQ$SMA50 <- SMA(QQQ$QQQ.Close, n = 50)
+
+# Create a new data frame for the moving averages
+moving_averages <- QQQ[, c("QQQ.Close", "SMA20", "SMA50")]
+
+# Plot the QQQ ETF prices and moving averages
+ggplot(moving_averages, aes(x = index(moving_averages))) +
+  geom_line(aes(y = QQQ.Close, color = "QQQ Close"), size = 1) +
+  geom_line(aes(y = SMA20, color = "20-Day SMA"), size = 1) +
+  geom_line(aes(y = SMA50, color = "50-Day SMA"), size = 1) +
+  labs(title = "QQQ ETF Price and Moving Averages",
+       x = "Date",
+       y = "Price") +
+  scale_color_manual(values = c("QQQ Close" = "blue", "20-Day SMA" = "green", "50-Day SMA" = "red")) +
+  theme_minimal()
+
+
+```
+```{r}
+QQQ <- getSymbols("QQQ",auto.assign = FALSE, from = "2020-01-01",src="yahoo") 
+QQQ=data.frame(QQQ)
+QQQ <- data.frame(QQQ,rownames(QQQ))
+colnames(QQQ)[7] = "date"
+QQQ$date<-as.Date(QQQ$date,"%Y-%m-%d")
+## ggplot
+QQQ %>%
+  ggplot()+
+  geom_line(aes(y=QQQ.Adjusted,x=date),color="blue")
+
+
+```
+```{r}
+#plotly
+# candlestick plot
+QQQ <- getSymbols("QQQ",auto.assign = FALSE, from = "2020-01-01",src="yahoo") 
+QQQ=data.frame(QQQ)
+QQQ <- data.frame(QQQ,rownames(QQQ))
+colnames(QQQ)[7] = "date"
+QQQ$date<-as.Date(QQQ$date,"%Y-%m-%d")
+df <- QQQ
+
+figc <- df %>% plot_ly(x = ~date, type="candlestick",
+          open = ~QQQ.Open, close = ~QQQ.Close,
+          high = ~QQQ.High, low = ~QQQ.Low) 
+figc <- figc %>% layout(title = "Basic Candlestick Chart")
+
+figc
+```
+
+```{r}
+library(quantmod)
+library(plotly)
+library(TTR)
+
+# Fetch QQQ data and convert to a data frame
+QQQ <- getSymbols("QQQ", auto.assign = FALSE, from = "2020-01-01", src = "yahoo")
+QQQ <- data.frame(QQQ)
+QQQ$date <- rownames(QQQ)
+colnames(QQQ)[7] <- "date"
+QQQ$date <- as.Date(QQQ$date, "%Y-%m-%d")
+
+# Calculate the two moving averages (e.g., 10-day and 50-day)
+QQQ$MA10 <- SMA(QQQ$QQQ.Close, n = 10)
+QQQ$MA50 <- SMA(QQQ$QQQ.Close, n = 50)
+
+# Create the candlestick chart
+figc <- df %>%
+  plot_ly(x = ~date, type = "candlestick",
+          open = ~QQQ.Open, close = ~QQQ.Close,
+          high = ~QQQ.High, low = ~QQQ.Low) %>%
+  layout(title = "Candlestick Chart with Moving Averages")
+
+# Add the moving averages to the chart
+figc <- figc %>%
+  add_lines(x = ~date, y = ~QQQ$MA10, name = "MA10", line = list(color = "blue")) %>%
+  add_lines(x = ~date, y = ~QQQ$MA50, name = "MA50", line = list(color = "red"))
+
+# Add labels to the chart
+figc <- figc %>%
+  add_annotations(x = QQQ$date[50], y = QQQ$QQQ.Low[50], text = "MA10", showarrow = TRUE, arrowhead = 2, ax = 0, ay = -40) %>%
+  add_annotations(x = QQQ$date[50], y = QQQ$QQQ.Low[50], text = "MA50", showarrow = TRUE, arrowhead = 2, ax = 0, ay = -60)
+
+figc
+
+
+```
+
+
+```{r}
+library(quantmod)
+library(plotly)
+library(TTR)
+
+# Fetch QQQ data and convert to a data frame
+QQQ <- getSymbols("QQQ", auto.assign = FALSE, from = "2020-01-01", src = "yahoo")
+QQQ <- data.frame(QQQ)
+QQQ$date <- rownames(QQQ)
+colnames(QQQ)[7] <- "date"
+QQQ$date <- as.Date(QQQ$date, "%Y-%m-%d")
+
+# Calculate the two moving averages (e.g., 10-day and 50-day)
+QQQ$MA10 <- SMA(QQQ$QQQ.Close, n = 10)
+QQQ$MA50 <- SMA(QQQ$QQQ.Close, n = 50)
+
+# Create the candlestick chart
+figc <- df %>%
+  plot_ly(x = ~date, type = "candlestick",
+          open = ~QQQ.Open, close = ~QQQ.Close,
+          high = ~QQQ.High, low = ~QQQ.Low) %>%
+  layout(title = "Candlestick Chart with Moving Averages")
+
+# Add the moving averages to the chart
+figc <- figc %>%
+  add_lines(x = ~date, y = ~QQQ$MA10, name = "MA10", line = list(color = "blue")) %>%
+  add_lines(x = ~date, y = ~QQQ$MA50, name = "MA50", line = list(color = "red"))
+
+# Add labels to the chart
+figc <- figc %>%
+  add_annotations(x = QQQ$date[50], y = QQQ$QQQ.Low[50], text = "MA10", showarrow = TRUE, arrowhead = 2, ax = 0, ay = -40) %>%
+  add_annotations(x = QQQ$date[50], y = QQQ$QQQ.Low[50], text = "MA50", showarrow = TRUE, arrowhead = 2, ax = 0, ay = -60)
+
+figc
+
+```
+
+
+```{r, echo=FALSE,warning=FALSE}
+
+library(plotly)
+# scatter plot with DATE on the x-axis and PRCP on the y-axis
+plot <- plot_ly(data = df, x = ~DATE, y = ~TMAX, type = 'scatter', mode = 'markers',marker = list(color = "purple"))
+
+# Layout
+plot <- plot %>% layout(title = "The MAX Temperature Over Time",
+                        xaxis = list(title = "Date"),
+                        yaxis = list(title = "The MAX Temperature (F)",
+                        paper_bgcolor = "#e8e4e4",  # Background color
+                        plot_bgcolor = "#e8e4e4"))
+
+
+plot
+
+```
+
+```{r, echo=FALSE}
+library(htmlwidgets)
+saveWidget(plot, file = "./max_temperature_plot.html")
+```
+
+```{r, echo=FALSE}
+df2 <- read.csv('./GEPUCURRENT.csv')
+
+```
+
+
+```{r, echo=FALSE,warning=FALSE}
+
+library(plotly)
+# scatter plot with DATE on the x-axis and PRCP on the y-axis
+plot <- plot_ly(data = df2, x = ~DATE, y = ~GEPUCURRENT, type = 'scatter', mode = 'lines',line = list(color = "red"))
+
+# Layout
+plot <- plot %>% layout(title = " Global Economic Policy Uncertainty Index: Current Price Adjusted GDP",
+                        xaxis = list(title = "Date"),
+                        yaxis = list(title = "Index",
+                        paper_bgcolor = "#e8e4e4",  # Background color
+                        plot_bgcolor = "#e8e4e4"))
+
+
+plot
+
+```
+
+
+
+```{r, echo=FALSE}
+saveWidget(plot, file = "./economic.html")
+```
+  3. Make only the plots visible in your webpage. (set `echo=FALSE` in your R code chunck)
+  
+  See this in website
+
+  4. Add interpretations to all the plots in the webpage.
+  
+  See this in website
+
+So now you will only have the plots and the interpretation in the webpage. You can add titles or can be creative about the page as you want.
+
+
+8. Add this Quarto webpage to your Georgetown domain. **And submit the URL for the Lab 0/1 assignment.**
+
+
