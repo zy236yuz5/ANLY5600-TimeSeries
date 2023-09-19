@@ -135,7 +135,25 @@ ul.task-list li input[type="checkbox"] {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#data-gathering" id="toc-data-gathering" class="nav-link active" data-scroll-target="#data-gathering">Data Gathering</a></li>
+  <li><a href="#data-discription-source" id="toc-data-discription-source" class="nav-link" data-scroll-target="#data-discription-source">Data Discription &amp; Source</a>
+  <ul class="collapse">
+  <li><a href="#household-savings" id="toc-household-savings" class="nav-link" data-scroll-target="#household-savings">1. <strong>Household Savings</strong></a></li>
+  <li><a href="#real-median-household-income-in-the-united-states" id="toc-real-median-household-income-in-the-united-states" class="nav-link" data-scroll-target="#real-median-household-income-in-the-united-states">2. <strong>Real Median Household Income in the United States</strong></a></li>
+  <li><a href="#median-sales-price-of-houses-sold-for-the-united-states" id="toc-median-sales-price-of-houses-sold-for-the-united-states" class="nav-link" data-scroll-target="#median-sales-price-of-houses-sold-for-the-united-states">3. <strong>Median Sales Price of Houses Sold for the United States</strong></a></li>
+  <li><a href="#gini-index-for-the-united-states" id="toc-gini-index-for-the-united-states" class="nav-link" data-scroll-target="#gini-index-for-the-united-states">4. <strong>GINI Index for the United States</strong></a></li>
+  <li><a href="#housing-affordability-index" id="toc-housing-affordability-index" class="nav-link" data-scroll-target="#housing-affordability-index">5. <strong>Housing Affordability Index</strong></a></li>
+  <li><a href="#personal-saving-rate" id="toc-personal-saving-rate" class="nav-link" data-scroll-target="#personal-saving-rate">6. <strong>Personal Saving Rate</strong></a></li>
+  <li><a href="#gross-domestic-product-implicit-price-deflator" id="toc-gross-domestic-product-implicit-price-deflator" class="nav-link" data-scroll-target="#gross-domestic-product-implicit-price-deflator">7. <strong>Gross Domestic Product: Implicit Price Deflator</strong></a></li>
+  <li><a href="#all-home-prices-in-states-in-the-usa" id="toc-all-home-prices-in-states-in-the-usa" class="nav-link" data-scroll-target="#all-home-prices-in-states-in-the-usa">8. <strong>All Home Prices in States in the USA</strong></a></li>
+  </ul></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">Reference:</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -157,9 +175,138 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<p>work in progress</p>
+<section id="data-gathering" class="level1">
+<h1>Data Gathering</h1>
+</section>
+<section id="data-discription-source" class="level1">
+<h1>Data Discription &amp; Source</h1>
+<p>In this section, different datasets are gained to help provide different analysis in later sections. Each dataset serves to answer questions that are defined in introduction section. To be more specifc, there are datasets regarding the household savings, incomes, sale prices, Gini idex, and housing affordability which can help us analysis the impact of the income disparities and housing affordability throughout USA. The detialed description of each dataset is provided.</p>
+<section id="household-savings" class="level3">
+<h3 class="anchored" data-anchor-id="household-savings">1. <strong>Household Savings</strong></h3>
+<ul>
+<li>Link: <a href="https://fred.stlouisfed.org/series/W398RC1A027NBEA">Household Saving Dataset</a></li>
+<li>Description: This dataset contains information related to household savings in the United States throughout the years from 1992 to 2021. It includes data information on the saving, which can be an important economic indicator for me to make analysis. The Units for dataset are Billions of Dollars, Not Seasonally Adjusted.</li>
+</ul>
+<div class="cell">
+
+</div>
+<div class="cell">
+
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="DataSources_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="real-median-household-income-in-the-united-states" class="level3">
+<h3 class="anchored" data-anchor-id="real-median-household-income-in-the-united-states">2. <strong>Real Median Household Income in the United States</strong></h3>
+<ul>
+<li>Link: <a href="https://fred.stlouisfed.org/series/MEHOINUSA672N">Real Median Household Income Dataset</a></li>
+<li>Description: This dataset represents the real median household income dataset. This is an estimation of Median Incomes. The Census Bureau has computed medians using either Pareto interpolation or linear interpolation. Currently, we are using linear interpolation to estimate all medians. Pareto interpolation assumes a decreasing density of population within an income interval, whereas linear interpolation assumes a constant density of population within an income interval. The Census Bureau calculated estimates of median income and associated standard errors for 1979 through 1987 using Pareto interpolation if the estimate was larger than $20,000 for people or $40,000 for families and households. This is because the width of the income interval containing the estimate is greater than $2,500.</li>
+</ul>
+<div class="cell">
+
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="DataSources_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="median-sales-price-of-houses-sold-for-the-united-states" class="level3">
+<h3 class="anchored" data-anchor-id="median-sales-price-of-houses-sold-for-the-united-states">3. <strong>Median Sales Price of Houses Sold for the United States</strong></h3>
+<ul>
+<li>Link: <a href="https://fred.stlouisfed.org/series/MSPUS">Median Sales Price of Houses Dataset</a></li>
+<li>Description: This dataset contains information on the median sales price of houses sold in the United States. It can be a valuable indicator of the state of the real estate market.</li>
+<li>This dataset can provide me with a direct view about the sale price of the house in USA. We can see clearly about the price disparities. Then, by comparing with the income and saving, we can know about the patterns regarding the impact of disparities.</li>
+</ul>
+<div class="cell">
+
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="DataSources_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="gini-index-for-the-united-states" class="level3">
+<h3 class="anchored" data-anchor-id="gini-index-for-the-united-states">4. <strong>GINI Index for the United States</strong></h3>
+<ul>
+<li><p>Link: <a href="https://fred.stlouisfed.org/series/SIPOVGINIUSA">GINI Index Dataset</a></p></li>
+<li><p>Description: This dataset shows the Gini index for United States. Gini index measures the extent to which the distribution of income or consumption expenditure among individuals or households within an economy deviates from a perfectly equal distribution. In addition, a Gini index of 0 represents perfect equality, while an index of 100 implies perfect inequality.</p></li>
+<li><p>Data are based on primary household survey data obtained from government statistical agencies and World Bank country departments.</p></li>
+<li><p>World Bank collection of development indicators, compiled from officially recognized international sources. It presents the most current and accurate global development data available and includes national, regional, and global estimates. The World Bank labels these annual series, but several observations are missing..</p></li>
+</ul>
+<p><img src="./image/DataSource/GINI.png" class="img-fluid"> Source Indicator: SI.POV.GINI</p>
+</section>
+<section id="housing-affordability-index" class="level3">
+<h3 class="anchored" data-anchor-id="housing-affordability-index">5. <strong>Housing Affordability Index</strong></h3>
+<ul>
+<li>Link: <a href="https://fred.stlouisfed.org/series/FIXHAI">Housing Affordability Index Dataset</a></li>
+<li>Description: This dataset contains data on the Housing Affordability Index. The housing affordability index measures the degree to which a typical family can afford the monthly mortgage payments on a typical home. Value of 100 means that a family with the median income has exactly enough income to qualify for a mortgage on a median-priced home. An index above 100 signifies that family earning the median income has more than enough income to qualify for a mortgage loan on a median-priced home, assuming a 20 percent down payment. This index is calculated for fixed mortgages.</li>
+<li>This dataset can directly tell us if one can easily afford a house. This can help me make analysis the resources disparities and the possible reasons for the differences in housing affordability</li>
+</ul>
+<div class="cell">
+
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="DataSources_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="personal-saving-rate" class="level3">
+<h3 class="anchored" data-anchor-id="personal-saving-rate">6. <strong>Personal Saving Rate</strong></h3>
+<ul>
+<li>Link: <a href="https://fred.stlouisfed.org/series/PSAVERT">Personal Saving Rate Dataset</a></li>
+<li>Description: This dataset is to provide information on the personal saving rate. The personal saving rate measures the percentage of disposable income that individuals save, which can be indicative of financial health. In here, personal saving as a percentage of disposable personal income (DPI), frequently referred to as “the personal saving rate,” is calculated as the ratio of personal saving to DPI.</li>
+<li>From this dataset, I can evaluate the overall changes throughout years regarding the personal savings. Then, by comparing with the income and house prices, we can see if there are any patterns or relationships.</li>
+</ul>
+<div class="cell">
+
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="DataSources_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="gross-domestic-product-implicit-price-deflator" class="level3">
+<h3 class="anchored" data-anchor-id="gross-domestic-product-implicit-price-deflator">7. <strong>Gross Domestic Product: Implicit Price Deflator</strong></h3>
+<ul>
+<li>Link: <a href="https://fred.stlouisfed.org/series/A191RI1Q225SBEA">GDP: Implicit Price Deflator Dataset</a></li>
+<li>Description: This dataset represents the Gross Domestic Product (GDP) Implicit Price Deflator for USA, which is a measure of inflation in the economy and is used to adjust GDP for price changes.</li>
+<li>This dataset aims to cover the overall GDP changes quetsions that can be utilized to make analysis on the impact of the incomes and housing prices.</li>
+</ul>
+<p><iframe src="./image/DataSource/gdp.html" width="800" height="600"></iframe></p>
+</section>
+<section id="all-home-prices-in-states-in-the-usa" class="level3">
+<h3 class="anchored" data-anchor-id="all-home-prices-in-states-in-the-usa">8. <strong>All Home Prices in States in the USA</strong></h3>
+<ul>
+<li>Link: <a href="https://www.zillow.com/research/data/">Zillow Home Prices Dataset</a></li>
+<li>Description: This dataset provides information on home prices in various states in the United States. It is sourced from Zillow, a well-known real estate and rental marketplace.</li>
+<li>These housing datasets (from zillow group) not only provide sufficient information concerning the house values and sales prices, but also include the different regions. I wish to compare different states or regions to find if there are any patterns in house values, sales prices, and rental prices. I want to find correlations among them. In addition, some of the datasets cover a great range of time even from 2000 to 2023. This can provide with a broader view of the dataset when making visualizations across the time. We can see clearly how the housing values and sales prices changed throughout the years and make forecasts for the future.</li>
+</ul>
+<p>A Screen shot for the dataset: <img src="./image/DataSource/homeprice.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="reference" class="level1">
+<h1>Reference:</h1>
+<ul>
+<li>Codes: <a href="https://github.com/zy236yuz5/ANLY5600-TimeSeries">Rmd, Python &amp; Qmd</a></li>
+<li>U.S. Bureau of Economic Analysis, Household saving [W398RC1A027NBEA], retrieved from FRED, Federal Reserve Bank of St.&nbsp;Louis; https://fred.stlouisfed.org/series/W398RC1A027NBEA, September 19, 2023.</li>
+<li>U.S. Census Bureau, Real Median Household Income in the United States [MEHOINUSA672N], retrieved from FRED, Federal Reserve Bank of St.&nbsp;Louis; https://fred.stlouisfed.org/series/MEHOINUSA672N, September 19, 2023.</li>
+<li>U.S. Census Bureau and U.S. Department of Housing and Urban Development, Median Sales Price of Houses Sold for the United States [MSPUS], retrieved from FRED, Federal Reserve Bank of St.&nbsp;Louis; https://fred.stlouisfed.org/series/MSPUS, September 19, 2023.</li>
+<li>World Bank, GINI Index for the United States [SIPOVGINIUSA], retrieved from FRED, Federal Reserve Bank of St.&nbsp;Louis; https://fred.stlouisfed.org/series/SIPOVGINIUSA, September 19, 2023.</li>
+<li>National Association of Realtors, Housing Affordability Index (Fixed) [FIXHAI], retrieved from FRED, Federal Reserve Bank of St.&nbsp;Louis; https://fred.stlouisfed.org/series/FIXHAI, September 19, 2023.</li>
+<li>U.S. Bureau of Economic Analysis, Personal Saving Rate [PSAVERT], retrieved from FRED, Federal Reserve Bank of St.&nbsp;Louis; https://fred.stlouisfed.org/series/PSAVERT, September 19, 2023.</li>
+<li>U.S. Bureau of Economic Analysis, Gross Domestic Product: Implicit Price Deflator [A191RI1Q225SBEA], retrieved from FRED, Federal Reserve Bank of St.&nbsp;Louis; https://fred.stlouisfed.org/series/A191RI1Q225SBEA, September 18, 2023.</li>
+<li>Zillow Group. Accessed April 19, 2023. “Zillow Research Data.” https://www.zillow.com/research/data/.</li>
+</ul>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

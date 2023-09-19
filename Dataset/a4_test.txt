@@ -1,0 +1,33 @@
+bash resize.sh 50
+
+
+
+
+cd fall-2023-assignment-04-zy236yuz5
+docker build ./ -t lambda-a4
+docker images
+docker run -p 8080:8080 lambda-a4
+
+curl -XPOST "http://localhost:8080/2015-03-31/functions/function/invocations" -d '{"file":"s3://zy236-assignment4/val/NORMAL/IM-0037-0001.jpeg"}'
+curl -XPOST "http://localhost:8080/2015-03-31/functions/function/invocations" -d '{"payload":"AAPL"}'
+curl -XPOST "http://localhost:8080/2015-03-31/functions/function/invocations" -d '{"payload":"appl"}'
+curl -XPOST "http://localhost:8080/2015-03-31/functions/function/invocations" -d '{"payload":"DOW"}'
+curl -XPOST "http://localhost:8080/2015-03-31/functions/function/invocations" -d '{"payload":"dow"}'
+curl -XPOST "http://localhost:8080/2015-03-31/functions/function/invocations" -d '{"payload":"goog"}'
+curl -XPOST "http://localhost:8080/2015-03-31/functions/function/invocations" -d '{"payload":"google"}'
+curl -XPOST "http://localhost:8080/2015-03-31/functions/function/invocations" -d '{}'
+
+aws ecr create-repository --repository-name docker-a4
+aws_region=$(aws configure get region)
+aws_account_id=$(aws sts get-caller-identity --query 'Account' --output text)
+
+aws ecr get-login-password \
+--region $aws_region \
+| docker login \
+--username AWS \
+--password-stdin $aws_account_id.dkr.ecr.$aws_region.amazonaws.com
+
+docker tag lambda-a4 $aws_account_id.dkr.ecr.$aws_region.amazonaws.com/docker-a4
+docker push $aws_account_id.dkr.ecr.$aws_region.amazonaws.com/docker-a4
+
+s3://zy236-assignment4/val/NORMAL/IM-0037-0001.jpeg
