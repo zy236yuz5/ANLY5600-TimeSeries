@@ -2,7 +2,7 @@
 title: "Spectral Analysis and Filtering"
 navbar:
     left:
-      - href: 
+      
       - about.qmd
       
       - Introduction.qmd

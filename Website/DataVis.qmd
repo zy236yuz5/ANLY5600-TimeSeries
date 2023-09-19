@@ -2,9 +2,8 @@
 title: "Data Visualization"
 navbar:
     left:
-      - href: 
-      - about.qmd
       
+      - about.qmd
       - Introduction.qmd
       - DataSources.qmd
       - DataVis.qmd

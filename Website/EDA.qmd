@@ -2,7 +2,7 @@
 title: "Exploratory Data Analysis"
 navbar:
     left:
-      - href: 
+      
       - about.qmd
       
       - Introduction.qmd

@@ -2,7 +2,7 @@
 title: "ARMA/ARIMA/SARIMA Models"
 navbar:
     left:
-      - href: 
+      
       - about.qmd
       
       - Introduction.qmd
