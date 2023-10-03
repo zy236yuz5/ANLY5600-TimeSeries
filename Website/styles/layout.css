@@ -6,16 +6,14 @@ Author URI: http://www.os-templates.com/
 Licence: Free to use under our free template licence terms
 Licence URI: http://www.os-templates.com/template-terms
 File: Layout CSS
-
-/*
-@import url("navi.css");
 */
+
+@import url("navi.css");
 @import url("forms.css");
 @import url("tables.css");
 @import url("homepage.css");
 @import url("gallery.css");
 @import url("portfolio.css");
-
 
 html{overflow-y:scroll;}
 body{margin:0; padding:0; font-size:16px; font-family:Georgia, "Times New Roman", Times, serif; color:#292828; background-color:#E0E0E0;}
@@ -29,17 +27,8 @@ body{margin:0; padding:0; font-size:16px; font-family:Georgia, "Times New Roman"
 .clear{clear:both;}
 br.clear{clear:both; margin-top:-15px;}
 
-a{outline:none; text-decoration:none; color:#A3443E; }
-nav {
-    position: fixed;
-    
-    right: 20;
-    top: 20;
-    font-size:16px;
-    font-family:Georgia, "Times New Roman", Times, serif; color:#292828;
-    background-color: #E0E0E0;
-    
-  }
+a{outline:none; text-decoration:none; color:#A3443E; background-color:#E0E0E0;}
+
 .fl_left, .imgl{float:left;}
 .fl_right, .imgr{float:right;}
 

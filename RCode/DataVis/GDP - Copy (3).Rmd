@@ -1,0 +1,72 @@
+---
+title: "datavis"
+author: "Zonghong Yu"
+date: "2023-09-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(xts)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+```
+
+
+```{r}
+df <- read.csv("../../Dataset/project/household_saving.csv")
+df$DATE <- as.Date(df$DATE)
+head(df)
+```
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df <- read.csv("../../Dataset/project/A191RI1Q225SBEA.csv")
+df$DATE <- as.Date(df$DATE)
+```
+
+```{r, echo=FALSE,warning=FALSE,message=FALSE}
+
+library(plotly)
+
+
+
+# Create a plotly plot with background color set to #E0E0E0 and line color set to grey
+p <- plot_ly(data = df, x = ~DATE, y = ~A191RI1Q225SBEA, type = 'scatter', mode = 'lines', 
+             line = list(color = 'grey')) %>%
+  layout(
+    title = "GDP Over Time In USA",
+    xaxis = list(title = "Date"),
+    yaxis = list(title = "Percent Change from Preceding Period"),
+    plot_bgcolor = '#E0E0E0',   # Setting the background color
+    paper_bgcolor = '#E0E0E0'  # Setting the surrounding background color
+  )
+
+# Display the plot
+p
+
+```   
+
+
+```{r, echo=FALSE}
+library(htmlwidgets)
+saveWidget(p, file = "../../image/DataSource/gdp.html")
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

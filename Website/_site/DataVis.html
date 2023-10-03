@@ -135,7 +135,18 @@ ul.task-list li input[type="checkbox"] {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-household-income-saving-sale-price" id="toc-the-household-income-saving-sale-price" class="nav-link active" data-scroll-target="#the-household-income-saving-sale-price">The Household Income, Saving, Sale Price</a></li>
+  <li><a href="#gross-domestic-product-implicit-price-deflator" id="toc-gross-domestic-product-implicit-price-deflator" class="nav-link" data-scroll-target="#gross-domestic-product-implicit-price-deflator"><strong>Gross Domestic Product: Implicit Price Deflator</strong></a></li>
+  <li><a href="#finding-correlations-and-disparities-among-the-top-20-metropoliatan-areas-across-the-time" id="toc-finding-correlations-and-disparities-among-the-top-20-metropoliatan-areas-across-the-time" class="nav-link" data-scroll-target="#finding-correlations-and-disparities-among-the-top-20-metropoliatan-areas-across-the-time">Finding correlations and disparities among the top 20 metropoliatan areas across the time</a></li>
+  <li><a href="#the-pattern-relationship" id="toc-the-pattern-relationship" class="nav-link" data-scroll-target="#the-pattern-relationship">The Pattern relationship</a></li>
+  <li><a href="#the-disparities-among-state-and-msa" id="toc-the-disparities-among-state-and-msa" class="nav-link" data-scroll-target="#the-disparities-among-state-and-msa">The disparities among state and MSA</a></li>
+  <li><a href="#references-and-codes" id="toc-references-and-codes" class="nav-link" data-scroll-target="#references-and-codes">References and Codes</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -157,9 +168,60 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<p>work in progress</p>
+<p>In this section, we will explore the datasets that we created by using visualizations. The goal is to gain insights and ideas before applying models and analysis. The data visualization and storytelling are very crucial for us to understand the impact of the income and houseing prices disparities. In this section, by utilizing different visualizations with different tools, we endeavor to delve into the depths of the datasets, finding potential trends, seasonality, and other features.</p>
+<section id="the-household-income-saving-sale-price" class="level3">
+<h3 class="anchored" data-anchor-id="the-household-income-saving-sale-price">The Household Income, Saving, Sale Price</h3>
+<p>First of all, we need to have a basic look at for the household income, household savings, and the sale price of the house. By putting the figures together, we can have a more direct idea about the trending and oscciliation throughout the time. Through interactive tableau visualization, we can see the temporal trends and oscillations that may be important for our analysis.</p>
+<div id="viz1696104624114" class="tableauPlaceholder" style="position: relative">
+<noscript>
+<a href="#"><img alt="Dashboard 1 " src="https://public.tableau.com/static/images/Da/DataVis_16961040487410/Dashboard1/1_rss.png" style="border: none"></a>
+</noscript>
+
+<object class="tableauViz" style="display:none;">
+<param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F"> <param name="embed_code_version" value="3"> <param name="site_root" value=""><param name="name" value="DataVis_16961040487410/Dashboard1"><param name="tabs" value="no"><param name="toolbar" value="yes"><param name="static_image" value="https://public.tableau.com/static/images/Da/DataVis_16961040487410/Dashboard1/1.png"> <param name="animate_transition" value="yes"><param name="display_static_image" value="yes"><param name="display_spinner" value="yes"><param name="display_overlay" value="yes"><param name="display_count" value="yes"><param name="language" value="en-US">
+</object>
+</div>
+
+<script type="text/javascript">                    var divElement = document.getElementById('viz1696104624114');                    var vizElement = divElement.getElementsByTagName('object')[0];                    if ( divElement.offsetWidth > 800 ) { vizElement.style.width='500px';vizElement.style.height='1000px';} else if ( divElement.offsetWidth > 700 ) { vizElement.style.width='500px';vizElement.style.height='1000px';} else { vizElement.style.width='50%';vizElement.style.height='800px';}                     var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                
+</script>
+<p>Based on the above plots, we can see that the household savings throughout the years generally follow an upwarding trend, which means that more and more people are willingly to save moneny. For Median household income, however, we can see that from 1984 to 2021, it has a lot of osccilations. Bascilly, the median household income did not change too much. And then! for sale prices of the houses, we can see that it follows a positive trend as well.</p>
+<p>From here, we can have a basic insight: while sale price increases, the median household income still remains the same throughout the years. This give us questions, why? And if this is the case, can people nowadays afford the house? In order to answer these quetsions, we need to dive into other datasets as well.</p>
+</section>
+<section id="gross-domestic-product-implicit-price-deflator" class="level3">
+<h3 class="anchored" data-anchor-id="gross-domestic-product-implicit-price-deflator"><strong>Gross Domestic Product: Implicit Price Deflator</strong></h3>
+<p>First, we need to have a look at of the GDP as a whole. Since GDP represent economic evaluations, which can offer us invaluable insights into the financial health and trajectory of a nation. With the GDP Implicit Price Deflator data, we aim to have insights on the potential reason of the income and sale price of house. The Deflator helps to discern between changes in GDP due to alterations in prices and changes due to alterations in quantities.</p>
+<p><iframe src="./image/DataSource/gdp.html" width="840" height="600"></iframe></p>
+<p>Based on the interactive plotly plot, we can see the percent change from preceding period. Generally from 1960 to 1980, it follows an upwarding trend which aligns with the household savings and sale prices. Then from 1980 to 2020, it follows a downwarding trend and appears to have fluctuations from 2020 to now. From 2020, the Covid-19 surely had huge impact of the general economic. However, the decreasing of the percent change from 1980 to 2020 indicates that the percent changes are generally small, which means that for these years the GDP remains roughly the same, which aligns with the incomes from previous figure.</p>
+<p>This also shows that while the GDP did not change too much, the household median incomes did not change as well. However, the sale prices and savings keep increasing.</p>
+</section>
+<section id="finding-correlations-and-disparities-among-the-top-20-metropoliatan-areas-across-the-time" class="level3">
+<h3 class="anchored" data-anchor-id="finding-correlations-and-disparities-among-the-top-20-metropoliatan-areas-across-the-time">Finding correlations and disparities among the top 20 metropoliatan areas across the time</h3>
+<p><iframe src="./image/DataViz/gini.html" width="840" height="600"></iframe></p>
+</section>
+<section id="the-pattern-relationship" class="level3">
+<h3 class="anchored" data-anchor-id="the-pattern-relationship">The Pattern relationship</h3>
+<div id="viz1696108002030" class="tableauPlaceholder" style="position: relative">
+<noscript>
+<a href="#"><img alt="Average Personal Saving Rate In USA VS Average Sales Price of Houses  " src="https://public.tableau.com/static/images/Da/DataVis_2_16961079929310/Sheet6/1_rss.png" style="border: none"></a>
+</noscript>
+
+<object class="tableauViz" style="display:none;">
+<param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F"> <param name="embed_code_version" value="3"> <param name="site_root" value=""><param name="name" value="DataVis_2_16961079929310/Sheet6"><param name="tabs" value="no"><param name="toolbar" value="yes"><param name="static_image" value="https://public.tableau.com/static/images/Da/DataVis_2_16961079929310/Sheet6/1.png"> <param name="animate_transition" value="yes"><param name="display_static_image" value="yes"><param name="display_spinner" value="yes"><param name="display_overlay" value="yes"><param name="display_count" value="yes"><param name="language" value="en-US"><param name="filter" value="publish=yes">
+</object>
+</div>
+
+<script type="text/javascript">                    var divElement = document.getElementById('viz1696108002030');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>
+</section>
+<section id="the-disparities-among-state-and-msa" class="level3">
+<h3 class="anchored" data-anchor-id="the-disparities-among-state-and-msa">The disparities among state and MSA</h3>
+<iframe src="./image/DataViz/bar.html" width="1000" height="1000" style="width:100%; border:none;">
+</iframe>
+</section>
+<section id="references-and-codes" class="level1">
+<h1>References and Codes</h1>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

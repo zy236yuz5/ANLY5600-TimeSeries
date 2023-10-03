@@ -21,7 +21,679 @@ format:
   html:
     theme: sandstone
     css: ./styles/layout.css
+    code-fold: true
     toc: true
 ---
 
-work in progress
+
+## The Household Income Data Analysis
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(reticulate)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(xts)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+```
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df <- read.csv("../Dataset/project/household_saving.csv")
+df$DATE <- as.Date(df$DATE)
+
+```
+
+```{r,warning=FALSE,echo=FALSE}
+library(ggplot2)
+
+
+ggplot(data = df, aes(x = DATE, y = W398RC1A027NBEA)) +
+  geom_line(color = "blue") +
+  labs(title = "Time Series Plot of Household Income",
+       x = "Date", 
+       y = "The Household Income") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+```
+
+From the plot, you can visually inspect:
+
+Trend: Any consistent upward or downward direction.
+Seasonality: Any repeating patterns or cycles.
+Variation: Fluctuations in the data.
+Periodic fluctuations: Spikes or drops at consistent intervals.
+Determine if the time series looks multiplicative or additive. An additive time series has constant amplitude and frequency, while a multiplicative one has varying amplitude/frequency.
+
+```{r,warning=FALSE,echo=FALSE}
+# Lag plot
+lagged_data <- data.frame(value = df$W398RC1A027NBEA[-1],
+                          lagged_value = df$W398RC1A027NBEA[-length(df$W398RC1A027NBEA)])
+
+# Enhanced Lag Plot
+ggplot(data = lagged_data, aes(x = lagged_value, y = value)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  labs(title = "Lag Plot (lag=1)",
+       x = "Value at t-1",
+       y = "Value at t") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+
+```
+
+
+You'd interpret the lag plot by looking for any structure. If the points cluster along a diagonal line from bottom-left to top-right, there's a positive correlation. Any other pattern might suggest non-linearity or some pattern not captured by mere linear correlation
+
+```{r, echo=FALSE}
+#library(ggfortify)
+
+# Decomposition using ggplot2 styling
+decomposed <- decompose(ts(df$W398RC1A027NBEA, frequency=12), type = "additive")
+autoplot(decomposed) + 
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+```{r, echo=FALSE}
+library(forecast)
+
+# ACF Plot
+ggAcf(df$W398RC1A027NBEA) +
+  labs(title = "ACF of Household Income Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# PACF Plot
+ggPacf(df$W398RC1A027NBEA) +
+  labs(title = "PACF of Household Income Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+```{r, echo=FALSE}
+library(tseries)
+adf.test(df$W398RC1A027NBEA)
+
+
+```
+
+
+```{r, echo=FALSE}
+detrended_data <- data.frame(Date = df$DATE[-1], Detrended = diff(df$W398RC1A027NBEA))
+
+# Enhanced Detrended Plot
+ggplot(data = detrended_data, aes(x = Date, y = Detrended)) +
+  geom_line(color = "blue") +
+  labs(title = "Detrended Household Income Time Series",
+       x = "Date",
+       y = "Detrended Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+
+```{r,warning=FALSE, echo=FALSE}
+log_transformed_data <- data.frame(Date = df$DATE, LogTransformed = log(df$W398RC1A027NBEA))
+
+# Enhanced Log-transformed Plot with Custom Background
+ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
+  geom_line(color = "blue") +
+  labs(title = "Log-transformed Time Series of Household Income",
+       x = "Date",
+       y = "Log-transformed Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+
+
+## The Median House Sale Price Data Analysis
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df <- read.csv("../Dataset/project/MSPUS.csv")
+df$DATE <- as.Date(df$DATE)
+```
+
+```{r,warning=FALSE,echo=FALSE}
+library(ggplot2)
+
+
+ggplot(data = df, aes(x = DATE, y = MSPUS)) +
+  geom_line(color = "blue") +
+  labs(title = "Time Series Plot of Median Sale Price",
+       x = "Date", 
+       y = "The Sale Price") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+```
+
+From the plot, you can visually inspect:
+
+Trend: Any consistent upward or downward direction.
+Seasonality: Any repeating patterns or cycles.
+Variation: Fluctuations in the data.
+Periodic fluctuations: Spikes or drops at consistent intervals.
+Determine if the time series looks multiplicative or additive. An additive time series has constant amplitude and frequency, while a multiplicative one has varying amplitude/frequency.
+
+```{r,warning=FALSE,echo=FALSE}
+# Lag plot
+lagged_data <- data.frame(value = df$MSPUS[-1],
+                          lagged_value = df$MSPUS[-length(df$MSPUS)])
+
+# Enhanced Lag Plot
+ggplot(data = lagged_data, aes(x = lagged_value, y = value)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  labs(title = "Lag Plot (lag=1)",
+       x = "Value at t-1",
+       y = "Value at t") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+
+```
+
+
+You'd interpret the lag plot by looking for any structure. If the points cluster along a diagonal line from bottom-left to top-right, there's a positive correlation. Any other pattern might suggest non-linearity or some pattern not captured by mere linear correlation
+
+```{r, echo=FALSE}
+#library(ggfortify)
+
+# Decomposition using ggplot2 styling
+decomposed <- decompose(ts(df$MSPUS, frequency=12), type = "additive")
+autoplot(decomposed) + 
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+```{r, echo=FALSE}
+library(forecast)
+
+# ACF Plot
+ggAcf(df$MSPUS) +
+  labs(title = "ACF of Median Sale Price Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# PACF Plot
+ggPacf(df$MSPUS) +
+  labs(title = "PACF of Median Sale Price Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+```{r, echo=FALSE}
+library(tseries)
+adf.test(df$MSPUS)
+
+
+```
+
+
+```{r, echo=FALSE}
+detrended_data <- data.frame(Date = df$DATE[-1], Detrended = diff(df$MSPUS))
+
+# Enhanced Detrended Plot
+ggplot(data = detrended_data, aes(x = Date, y = Detrended)) +
+  geom_line(color = "blue") +
+  labs(title = "Detrended Median Sale Price Time Series",
+       x = "Date",
+       y = "Detrended Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+
+```{r,warning=FALSE, echo=FALSE}
+log_transformed_data <- data.frame(Date = df$DATE, LogTransformed = log(df$MSPUS))
+
+# Enhanced Log-transformed Plot with Custom Background
+ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
+  geom_line(color = "blue") +
+  labs(title = "Log-transformed Time Series of Median Sale Price",
+       x = "Date",
+       y = "Log-transformed Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+## The Housing Affordability Index Data Analysis
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df <- read.csv("../Dataset/project/PSAVERT.csv")
+df$DATE <- as.Date(df$DATE)
+
+```
+
+```{r,warning=FALSE}
+library(ggplot2)
+
+
+ggplot(data = df, aes(x = DATE, y = PSAVERT)) +
+  geom_line(color = "blue") +
+  labs(title = "Time Series Plot of Housing Affordability Index",
+       x = "Date", 
+       y = "The Housing Affordability Index") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+```
+From the plot, you can visually inspect:
+
+Trend: Any consistent upward or downward direction.
+Seasonality: Any repeating patterns or cycles.
+Variation: Fluctuations in the data.
+Periodic fluctuations: Spikes or drops at consistent intervals.
+Determine if the time series looks multiplicative or additive. An additive time series has constant amplitude and frequency, while a multiplicative one has varying amplitude/frequency.
+
+```{r}
+# Lag plot
+lagged_data <- data.frame(value = df$PSAVERT[-1],
+                          lagged_value = df$PSAVERT[-length(df$PSAVERT)])
+
+# Enhanced Lag Plot
+ggplot(data = lagged_data, aes(x = lagged_value, y = value)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  labs(title = "Lag Plot (lag=1)",
+       x = "Value at t-1",
+       y = "Value at t") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+
+```
+You'd interpret the lag plot by looking for any structure. If the points cluster along a diagonal line from bottom-left to top-right, there's a positive correlation. Any other pattern might suggest non-linearity or some pattern not captured by mere linear correlation
+
+```{r}
+#library(ggfortify)
+
+# Decomposition using ggplot2 styling
+decomposed <- decompose(ts(df$PSAVERT, frequency=12), type = "additive")
+autoplot(decomposed) + 
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+```{r}
+library(forecast)
+
+# ACF Plot
+ggAcf(df$PSAVERT) +
+  labs(title = "ACF of Housing Affordability Index Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# PACF Plot
+ggPacf(df$PSAVERT) +
+  labs(title = "PACF of Housing Affordability Index Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+The ACF plot can help determine if the series is stationary. If the series is non-stationary, the ACF will decay slowly, while for a stationary series, the ACF will drop off quickly
+
+
+```{r}
+library(tseries)
+adf.test(df$PSAVERT)
+
+
+```
+
+stationary !
+
+```{r}
+detrended_data <- data.frame(Date = df$DATE[-1], Detrended = diff(df$PSAVERT))
+
+# Enhanced Detrended Plot
+ggplot(data = detrended_data, aes(x = Date, y = Detrended)) +
+  geom_line(color = "blue") +
+  labs(title = "Detrended Time Series",
+       x = "Date",
+       y = "Detrended Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+```{r,warning=FALSE}
+log_transformed_data <- data.frame(Date = df$DATE, LogTransformed = log(df$PSAVERT))
+
+# Enhanced Log-transformed Plot with Custom Background
+ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
+  geom_line(color = "blue") +
+  labs(title = "Log-transformed Time Series of Housing Affordability Index",
+       x = "Date",
+       y = "Log-transformed Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+
+## The GDP Exploratory Data Analysis
+
+```{r, echo = FALSE}
+df <- read.csv("../Dataset/project/A191RI1Q225SBEA.csv")
+df$DATE <- as.Date(df$DATE)
+```
+```{r, echo = FALSE,warning=FALSE}
+library(ggplot2)
+
+
+ggplot(data = df, aes(x = DATE, y = A191RI1Q225SBEA)) +
+  geom_line(color = "blue") +
+  labs(title = "Time Series Plot of GDP",
+       x = "Date", 
+       y = "Percent Change from Preceding Period") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+```
+
+
+From the plot, you can visually inspect:
+
+Trend: Any consistent upward or downward direction.
+Seasonality: Any repeating patterns or cycles.
+Variation: Fluctuations in the data.
+Periodic fluctuations: Spikes or drops at consistent intervals.
+Determine if the time series looks multiplicative or additive. An additive time series has constant amplitude and frequency, while a multiplicative one has varying amplitude/frequency.
+
+```{r, echo = FALSE}
+# Lag plot
+lagged_data <- data.frame(value = df$A191RI1Q225SBEA[-1],
+                          lagged_value = df$A191RI1Q225SBEA[-length(df$A191RI1Q225SBEA)])
+
+# Enhanced Lag Plot
+ggplot(data = lagged_data, aes(x = lagged_value, y = value)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  labs(title = "Lag Plot (lag=1)",
+       x = "Value at t-1",
+       y = "Value at t") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+```
+
+```{r, echo = FALSE}
+
+# Decomposition using ggplot2 styling
+decomposed <- decompose(ts(df$A191RI1Q225SBEA, frequency=12), type = "additive")
+autoplot(decomposed) + 
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+```
+
+```{r, echo = FALSE}
+library(forecast)
+
+# ACF Plot
+ggAcf(df$A191RI1Q225SBEA) +
+  labs(title = "ACF of GDP Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# PACF Plot
+ggPacf(df$A191RI1Q225SBEA) +
+  labs(title = "PACF of GDP Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+```{r, echo = FALSE}
+library(tseries)
+adf.test(df$A191RI1Q225SBEA)
+```
+
+
+```{r, echo = FALSE}
+detrended_data <- data.frame(Date = df$DATE[-1], Detrended = diff(df$A191RI1Q225SBEA))
+
+# Enhanced Detrended Plot
+ggplot(data = detrended_data, aes(x = Date, y = Detrended)) +
+  geom_line(color = "blue") +
+  labs(title = "Detrended Time Series",
+       x = "Date",
+       y = "Detrended Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+```{r, warning=FALSE, echo = FALSE}
+log_transformed_data <- data.frame(Date = df$DATE, LogTransformed = log(df$A191RI1Q225SBEA))
+
+# Enhanced Log-transformed Plot with Custom Background
+ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
+  geom_line(color = "blue") +
+  labs(title = "Log-transformed Time Series of GDP",
+       x = "Date",
+       y = "Log-transformed Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+## The Mean Sale Price Analysis
+
+
+```{python, echo=FALSE}
+import  pandas  as  pd
+
+import matplotlib.pyplot as plt
+import altair as alt
+import warnings
+warnings.filterwarnings('ignore')
+
+```
+
+
+```{python, echo=FALSE}
+# directory containing the CSV files
+
+path2 = '../Dataset/project/Merged_downsample.csv'
+
+df_selected = pd.read_csv(path2)
+plt.rcParams.update(plt.rcParamsDefault)
+import matplotlib as mpl
+
+# Set global figure settings
+mpl.rcParams['figure.facecolor'] = '#E0E0E0'
+mpl.rcParams['axes.facecolor'] = '#E0E0E0'
+mpl.rcParams['savefig.facecolor'] = '#E0E0E0'
+warnings.filterwarnings('ignore')
+```
+
+
+```{python,echo=FALSE}
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+# Decomposing
+result = seasonal_decompose(df_selected['Mean Sale Price'].values, model='additive', period=12)
+fig = result.plot()
+fig.set_facecolor('#E0E0E0')
+plt.show()
+
+warnings.filterwarnings('ignore')
+```
+
+```{python, echo=FALSE}
+from pandas.plotting import lag_plot
+
+plt.figure(figsize=(6, 6))
+lag_plot(df_selected['Mean Sale Price'])
+plt.title('Lag Plot of Mean Sale Price')
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.show()
+
+```
+
+
+```{python, echo=FALSE}
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+
+# ACF plot
+fig, ax = plt.subplots(figsize=(10, 4))
+plot_acf(df_selected['Mean Sale Price'], ax=ax)
+plt.title('ACF of Mean Sale Price')
+plt.show()
+
+# PACF plot
+fig, ax = plt.subplots(figsize=(10, 4))
+plot_pacf(df_selected['Mean Sale Price'], ax=ax)
+plt.title('PACF of Mean Sale Price')
+plt.show()
+
+
+```
+
+
+```{python, echo=FALSE}
+from statsmodels.tsa.stattools import adfuller
+
+adf_result = adfuller(df_selected['Mean Sale Price'].values)
+print(f'ADF Statistic: {adf_result[0]}')
+print(f'p-value: {adf_result[1]}')
+print('Critical Values:')
+for key, value in adf_result[4].items():
+    print(f'\t{key}: {value}')
+
+```
+
+
+```{python, echo=FALSE}
+import seaborn as sns
+import matplotlib.pyplot as plt
+# Filter only numeric columns
+df_selected = df_selected.rename(columns={
+    "mean": "Mean Rental Price",
+    "Log_Mean_Sale_Price": "Log Mean Sale Price"
+})
+
+
+numeric_cols = df_selected.select_dtypes(include=[float, int])
+
+```
+
+
+```{python, echo=FALSE}
+
+
+# Calculate correlations
+corr = numeric_cols.corr()
+
+# Set up the matplotlib figure with the desired theme
+plt.figure(figsize=(10, 8))
+sns.set_theme(style="white", rc={"axes.facecolor": "#E0E0E0", "grid.color": "#E0E0E0"})
+sns.set_context("talk")
+
+# Draw the heatmap with a color map of choice
+sns.heatmap(corr, annot=True, cmap='coolwarm', linewidths=0.5, linecolor='black')
+
+# Adjust the plot's aesthetics
+plt.title('Correlation Heatmap')
+plt.show()
+
+```
+
+
+
+
