@@ -202,11 +202,49 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-household-income-data-analysis" id="toc-the-household-income-data-analysis" class="nav-link active" data-scroll-target="#the-household-income-data-analysis">The Household Income Data Analysis</a></li>
-  <li><a href="#the-median-house-sale-price-data-analysis" id="toc-the-median-house-sale-price-data-analysis" class="nav-link" data-scroll-target="#the-median-house-sale-price-data-analysis">The Median House Sale Price Data Analysis</a></li>
-  <li><a href="#the-housing-affordability-index-data-analysis" id="toc-the-housing-affordability-index-data-analysis" class="nav-link" data-scroll-target="#the-housing-affordability-index-data-analysis">The Housing Affordability Index Data Analysis</a></li>
-  <li><a href="#the-gdp-exploratory-data-analysis" id="toc-the-gdp-exploratory-data-analysis" class="nav-link" data-scroll-target="#the-gdp-exploratory-data-analysis">The GDP Exploratory Data Analysis</a></li>
-  <li><a href="#the-mean-sale-price-analysis" id="toc-the-mean-sale-price-analysis" class="nav-link" data-scroll-target="#the-mean-sale-price-analysis">The Mean Sale Price Analysis</a></li>
+  <li><a href="#the-household-income-data-analysis" id="toc-the-household-income-data-analysis" class="nav-link active" data-scroll-target="#the-household-income-data-analysis">The Household Income Data Analysis</a>
+  <ul class="collapse">
+  <li><a href="#lag-plot" id="toc-lag-plot" class="nav-link" data-scroll-target="#lag-plot">LAG Plot</a></li>
+  <li><a href="#decomposition" id="toc-decomposition" class="nav-link" data-scroll-target="#decomposition">Decomposition</a></li>
+  <li><a href="#acf-pacf" id="toc-acf-pacf" class="nav-link" data-scroll-target="#acf-pacf">ACF &amp; PACF</a></li>
+  <li><a href="#validation-with-adf-test" id="toc-validation-with-adf-test" class="nav-link" data-scroll-target="#validation-with-adf-test">Validation with ADF Test</a></li>
+  <li><a href="#detrended-and-log-transformed" id="toc-detrended-and-log-transformed" class="nav-link" data-scroll-target="#detrended-and-log-transformed">Detrended and Log-transformed</a></li>
+  </ul></li>
+  <li><a href="#the-median-house-sale-price-data-analysis" id="toc-the-median-house-sale-price-data-analysis" class="nav-link" data-scroll-target="#the-median-house-sale-price-data-analysis">The Median House Sale Price Data Analysis</a>
+  <ul class="collapse">
+  <li><a href="#the-time-series" id="toc-the-time-series" class="nav-link" data-scroll-target="#the-time-series">The Time Series</a></li>
+  <li><a href="#lag-plots" id="toc-lag-plots" class="nav-link" data-scroll-target="#lag-plots">Lag Plots</a></li>
+  <li><a href="#decomposition-for-the-data" id="toc-decomposition-for-the-data" class="nav-link" data-scroll-target="#decomposition-for-the-data">Decomposition for the data</a></li>
+  <li><a href="#acf-and-pacf-of-the-data" id="toc-acf-and-pacf-of-the-data" class="nav-link" data-scroll-target="#acf-and-pacf-of-the-data">ACF and PACF of the data</a></li>
+  <li><a href="#adf-test" id="toc-adf-test" class="nav-link" data-scroll-target="#adf-test">ADF Test</a></li>
+  <li><a href="#detrended-and-log-transformation" id="toc-detrended-and-log-transformation" class="nav-link" data-scroll-target="#detrended-and-log-transformation">Detrended and Log transformation</a></li>
+  </ul></li>
+  <li><a href="#the-housing-affordability-index-data-analysis" id="toc-the-housing-affordability-index-data-analysis" class="nav-link" data-scroll-target="#the-housing-affordability-index-data-analysis">The Housing Affordability Index Data Analysis</a>
+  <ul class="collapse">
+  <li><a href="#time-series-plot-for-housing-affordability-index" id="toc-time-series-plot-for-housing-affordability-index" class="nav-link" data-scroll-target="#time-series-plot-for-housing-affordability-index">Time Series Plot for Housing Affordability Index</a></li>
+  <li><a href="#lag-plot-for-houseing-affordability" id="toc-lag-plot-for-houseing-affordability" class="nav-link" data-scroll-target="#lag-plot-for-houseing-affordability">Lag Plot for Houseing Affordability</a></li>
+  <li><a href="#decomposition-of-the-housing-affordability" id="toc-decomposition-of-the-housing-affordability" class="nav-link" data-scroll-target="#decomposition-of-the-housing-affordability">Decomposition of the Housing Affordability</a></li>
+  <li><a href="#acf-and-pacf-analysis" id="toc-acf-and-pacf-analysis" class="nav-link" data-scroll-target="#acf-and-pacf-analysis">ACF and PACF Analysis</a></li>
+  <li><a href="#adf-test-1" id="toc-adf-test-1" class="nav-link" data-scroll-target="#adf-test-1">ADF Test</a></li>
+  <li><a href="#detrened-and-log-transformation" id="toc-detrened-and-log-transformation" class="nav-link" data-scroll-target="#detrened-and-log-transformation">Detrened and Log-transformation</a></li>
+  </ul></li>
+  <li><a href="#the-gdp-exploratory-data-analysis" id="toc-the-gdp-exploratory-data-analysis" class="nav-link" data-scroll-target="#the-gdp-exploratory-data-analysis">The GDP Exploratory Data Analysis</a>
+  <ul class="collapse">
+  <li><a href="#time-series-plot-of-gdp" id="toc-time-series-plot-of-gdp" class="nav-link" data-scroll-target="#time-series-plot-of-gdp">Time Series Plot of GDP</a></li>
+  <li><a href="#lag-for-gdp" id="toc-lag-for-gdp" class="nav-link" data-scroll-target="#lag-for-gdp">Lag for GDP</a></li>
+  <li><a href="#decomposition-of-the-data" id="toc-decomposition-of-the-data" class="nav-link" data-scroll-target="#decomposition-of-the-data">Decomposition of the Data</a></li>
+  <li><a href="#acf-and-pacf" id="toc-acf-and-pacf" class="nav-link" data-scroll-target="#acf-and-pacf">ACF and PACF</a></li>
+  <li><a href="#detrended-and-log-transformation-1" id="toc-detrended-and-log-transformation-1" class="nav-link" data-scroll-target="#detrended-and-log-transformation-1">Detrended and Log-transformation</a></li>
+  </ul></li>
+  <li><a href="#the-sale-price-disparity-analysis" id="toc-the-sale-price-disparity-analysis" class="nav-link" data-scroll-target="#the-sale-price-disparity-analysis">The Sale Price Disparity Analysis</a>
+  <ul class="collapse">
+  <li><a href="#time-series-decomposition-plot" id="toc-time-series-decomposition-plot" class="nav-link" data-scroll-target="#time-series-decomposition-plot">Time Series Decomposition Plot</a></li>
+  <li><a href="#lag-plot-1" id="toc-lag-plot-1" class="nav-link" data-scroll-target="#lag-plot-1">Lag Plot</a></li>
+  <li><a href="#acf-and-pacf-plots" id="toc-acf-and-pacf-plots" class="nav-link" data-scroll-target="#acf-and-pacf-plots">ACF and PACF plots</a></li>
+  <li><a href="#adf-tests" id="toc-adf-tests" class="nav-link" data-scroll-target="#adf-tests">ADF tests</a></li>
+  <li><a href="#correlation-heatmap" id="toc-correlation-heatmap" class="nav-link" data-scroll-target="#correlation-heatmap">Correlation heatmap</a></li>
+  </ul></li>
+  <li><a href="#references-and-codes" id="toc-references-and-codes" class="nav-link" data-scroll-target="#references-and-codes">References and Codes</a></li>
   </ul>
 </nav>
     </div>
@@ -230,8 +268,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 </header>
 
+<p>For Exploratory Data Analysis (EDA), we aim to have a deeper understanding of the time series data. This section involves multiple medthods and datasets for us to gain insights and understandings such as decompositions, lag plots, ACF, PACF, ADF tests, detrending, and others. For these methods, we are going to identify correlations, trends, seasonalities, and stationaries. Which can help us to make analysis and apply models in later sections. To be more specific, the lag plots and decomposing methods will allow us to discover dependencies and components. ACF and PACF can help us see the correlations and stationary, and the Augmented Dickey-Fuller Test to empirically probe its stationarity.</p>
 <section id="the-household-income-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="the-household-income-data-analysis">The Household Income Data Analysis</h2>
+<p>As we did in previous section, we start with the household income. In here, we have a basic look about the household income time series.</p>
 <div class="cell">
 
 </div>
@@ -243,19 +283,31 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><img src="EDA_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>From the plot, you can visually inspect:</p>
-<p>Trend: Any consistent upward or downward direction. Seasonality: Any repeating patterns or cycles. Variation: Fluctuations in the data. Periodic fluctuations: Spikes or drops at consistent intervals. Determine if the time series looks multiplicative or additive. An additive time series has constant amplitude and frequency, while a multiplicative one has varying amplitude/frequency.</p>
+<p>From the plot, we can visually inspect: Trend: There is clearly positive trend. Seasonality: It seems that it does not contain patterns. Variation: Fluctuations in the data exists. Periodic fluctuations: The fluctuations are randomly presented. multiplicative or additive： Only based on the timeseries plot, I think this follows multiplicative, because it has varying amplitude/frequency.</p>
+<p><br> <br></p>
+<p>Then, we want to see if there is any correlations. By utilizing lag plot, we can see if there are any correlations present:</p>
+<section id="lag-plot" class="level3">
+<h3 class="anchored" data-anchor-id="lag-plot">LAG Plot</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>You’d interpret the lag plot by looking for any structure. If the points cluster along a diagonal line from bottom-left to top-right, there’s a positive correlation. Any other pattern might suggest non-linearity or some pattern not captured by mere linear correlation</p>
+<p>Based on the lag plot, there’s a positive correlation since the points cluster along a diagonal line from bottom-left to top-right. This shows linearity. However, it could also mean that the dataset is not stationary.</p>
+<p>In order to determine if the dataset is stationary. we should use other methods as well. Before doing that, we should first check the trend, seasonality through decompositions.</p>
+</section>
+<section id="decomposition" class="level3">
+<h3 class="anchored" data-anchor-id="decomposition">Decomposition</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Now, based on the decomposition plot, we can see that it is correct that the data follows an upwarding trend. However, it seems that there is seasonal pattern involves with flutuations. In addition, it has varying amplitude/frequency. Therefore, I think this follows multiplicative.</p>
+<p>Then, we should utilize ACF and PACF to see about the correlation and stationary.</p>
+</section>
+<section id="acf-pacf" class="level3">
+<h3 class="anchored" data-anchor-id="acf-pacf">ACF &amp; PACF</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
@@ -264,6 +316,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><img src="EDA_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>From here, we can see that the dataset has a correlation, which also means that it is not stationary. In order to prove this conclusion, we utilize the adf test to ensure the results are the same.</p>
+</section>
+<section id="validation-with-adf-test" class="level3">
+<h3 class="anchored" data-anchor-id="validation-with-adf-test">Validation with ADF Test</h3>
 <div class="cell">
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in adf.test(df$W398RC1A027NBEA): p-value greater than printed p-value</code></pre>
@@ -277,6 +333,11 @@ Dickey-Fuller = 0.038046, Lag order = 3, p-value = 0.99
 alternative hypothesis: stationary</code></pre>
 </div>
 </div>
+<p>Based on the result, we can see that the p-value is greater than the thershold value, this means that we fail to reject the Null hypothesis. The time series dataset is not stationary.</p>
+<p>Then, to explore more, we utilize detrended and log-transformation to see about the patterns</p>
+</section>
+<section id="detrended-and-log-transformed" class="level3">
+<h3 class="anchored" data-anchor-id="detrended-and-log-transformed">Detrended and Log-transformed</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
@@ -287,9 +348,14 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>From here, we can see that after detrending, the household income remains fluctuations espectially during 2020 period, which could be the cause of the Covid-19. In addition, Log-transformed time series, in order to remove the hetroscadastisity, we can see that the trend remains. I think the reason is possibly because log-transformation can assuage issues related to non-constant variance, which means that the inherent trend within the data may persist.</p>
+</section>
 </section>
 <section id="the-median-house-sale-price-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="the-median-house-sale-price-data-analysis">The Median House Sale Price Data Analysis</h2>
+<p>Since our key is to discover the impact of the income and house price, we certainly need to make analysis for the sale price data.</p>
+<section id="the-time-series" class="level3">
+<h3 class="anchored" data-anchor-id="the-time-series">The Time Series</h3>
 <div class="cell">
 
 </div>
@@ -298,19 +364,31 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>From the plot, you can visually inspect:</p>
-<p>Trend: Any consistent upward or downward direction. Seasonality: Any repeating patterns or cycles. Variation: Fluctuations in the data. Periodic fluctuations: Spikes or drops at consistent intervals. Determine if the time series looks multiplicative or additive. An additive time series has constant amplitude and frequency, while a multiplicative one has varying amplitude/frequency.</p>
+<p>From the plot, the results are the same with the previous section. It has an upwarding trend.</p>
+<p>To be more specific, from the plot, we can visually inspect: Trend: There is clearly positive trend. Seasonality: It seems that it does not contain patterns. Variation: Fluctuations in the data exists but not too much. Periodic fluctuations: The fluctuations are presented in 2010 and 2021. multiplicative or additive： Only based on the timeseries plot, I think this follows additive, because it does not have too much variance.</p>
+<p>Then, we want to see if there is any correlations. By utilizing lag plot, we can see if there are any correlations present:</p>
+</section>
+<section id="lag-plots" class="level3">
+<h3 class="anchored" data-anchor-id="lag-plots">Lag Plots</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>You’d interpret the lag plot by looking for any structure. If the points cluster along a diagonal line from bottom-left to top-right, there’s a positive correlation. Any other pattern might suggest non-linearity or some pattern not captured by mere linear correlation</p>
+<p>Based on the lag plot, there’s a positive correlation since the points cluster along a diagonal line from bottom-left to top-right. In addition, this aligns with the same conclusion and it has a strong positive correlation. This shows linearity.</p>
+</section>
+<section id="decomposition-for-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="decomposition-for-the-data">Decomposition for the data</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Now, based on the decomposition plot, we can see that it is correct that the data follows an upwarding trend. In addition, it has roughly constant amplitude/frequency. Therefore, I think this follows additive.</p>
+<p>Then, we should utilize ACF and PACF to see about the correlation and stationary.</p>
+</section>
+<section id="acf-and-pacf-of-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="acf-and-pacf-of-the-data">ACF and PACF of the data</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
@@ -319,6 +397,10 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-14-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>From here, we can see that the dataset has a correlation, which also means that it is not stationary. In order to prove this conclusion, we utilize the adf test to ensure the results are the same.</p>
+</section>
+<section id="adf-test" class="level3">
+<h3 class="anchored" data-anchor-id="adf-test">ADF Test</h3>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -329,6 +411,11 @@ Dickey-Fuller = -2.6866, Lag order = 6, p-value = 0.287
 alternative hypothesis: stationary</code></pre>
 </div>
 </div>
+<p>Based on the result, we can see that the p-value is greater than the thershold value, this means that we fail to reject the Null hypothesis. The time series dataset is not stationary.</p>
+<p>Then, to explore more, we utilize detrended and log-transformation to see about the patterns</p>
+</section>
+<section id="detrended-and-log-transformation" class="level3">
+<h3 class="anchored" data-anchor-id="detrended-and-log-transformation">Detrended and Log transformation</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
@@ -339,9 +426,14 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>From here, we can see that after detrending, the sale prices remains fluctuations espectially from 2000 to 2020 period. In addition, Log-transformed time series, in order to remove the hetroscadastisity, we can see that the trend remains. I think the reason is possibly because log-transformation can assuage issues related to non-constant variance, which means that the inherent trend within the data may persist.</p>
+</section>
 </section>
 <section id="the-housing-affordability-index-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="the-housing-affordability-index-data-analysis">The Housing Affordability Index Data Analysis</h2>
+<p>Then, after we have a basic understanding about the income and sale price. We need to dive into the impact. We utilize the housing affordability index to see the impact of the income and sale price. Let us firt explore the houseing affordability index first.</p>
+<section id="time-series-plot-for-housing-affordability-index" class="level3">
+<h3 class="anchored" data-anchor-id="time-series-plot-for-housing-affordability-index">Time Series Plot for Housing Affordability Index</h3>
 <div class="cell">
 
 </div>
@@ -366,8 +458,10 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>From the plot, you can visually inspect:</p>
-<p>Trend: Any consistent upward or downward direction. Seasonality: Any repeating patterns or cycles. Variation: Fluctuations in the data. Periodic fluctuations: Spikes or drops at consistent intervals. Determine if the time series looks multiplicative or additive. An additive time series has constant amplitude and frequency, while a multiplicative one has varying amplitude/frequency.</p>
+<p>From the plot, we can visually inspect: Trend: It seems that it did not have a consistent trend. From 1960 to 1970, it has upwarding trend. But then it has dewarding trend. And has a huge fluctuations during 2020, Covid period. Seasonality: I think there are small patterns that show seasonality in dataset. Variation: Fluctuations in the data exist. Periodic fluctuations: Spikes or drops at consistent intervals exist. Multiplicative or additive: I think the dataset could follow an additive pattern. Because it seems that it has constant amplitude and frequency although with some fluctuations. In order to prove these, we need to explore more using different methods.</p>
+</section>
+<section id="lag-plot-for-houseing-affordability" class="level3">
+<h3 class="anchored" data-anchor-id="lag-plot-for-houseing-affordability">Lag Plot for Houseing Affordability</h3>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -378,7 +472,7 @@ alternative hypothesis: stationary</code></pre>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Enhanced Lag Plot</span></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> lagged_data, <span class="fu">aes</span>(<span class="at">x =</span> lagged_value, <span class="at">y =</span> value)) <span class="sc">+</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"blue"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Lag Plot (lag=1)"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Lag Plot"</span>,</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Value at t-1"</span>,</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Value at t"</span>) <span class="sc">+</span></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
@@ -391,7 +485,11 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>You’d interpret the lag plot by looking for any structure. If the points cluster along a diagonal line from bottom-left to top-right, there’s a positive correlation. Any other pattern might suggest non-linearity or some pattern not captured by mere linear correlation</p>
+<p>Based on the lag plot, there’s a positive correlation since the points cluster along a diagonal line from bottom-left to top-right. This shows linearity. However, it could also mean that the dataset is not stationary.</p>
+<p>In order to determine if the dataset is stationary. we should use other methods as well. Before doing that, we should first check the trend, seasonality through decompositions.</p>
+</section>
+<section id="decomposition-of-the-housing-affordability" class="level3">
+<h3 class="anchored" data-anchor-id="decomposition-of-the-housing-affordability">Decomposition of the Housing Affordability</h3>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -408,6 +506,11 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Now, based on the decomposition plot, we can see that it is correct that the data did not follow a specific trend. However, it seems that there is seasonal pattern involves with flutuations. In addition, mostly it has constant amplitude/frequency. Therefore, I think this follows additive pattern.</p>
+<p>Then, we should utilize ACF and PACF to see about the correlation and stationary.</p>
+</section>
+<section id="acf-and-pacf-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="acf-and-pacf-analysis">ACF and PACF Analysis</h3>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -436,7 +539,10 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-22-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>The ACF plot can help determine if the series is stationary. If the series is non-stationary, the ACF will decay slowly, while for a stationary series, the ACF will drop off quickly</p>
+<p>The ACF plot can help determine if the series is stationary. From here, we can see that the dataset has a correlation, and it is decaying slowly which also means that it is not stationary. In order to prove this conclusion, we utilize the adf test to ensure the results are the same.</p>
+</section>
+<section id="adf-test-1" class="level3">
+<h3 class="anchored" data-anchor-id="adf-test-1">ADF Test</h3>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -452,7 +558,11 @@ Dickey-Fuller = -3.543, Lag order = 9, p-value = 0.03817
 alternative hypothesis: stationary</code></pre>
 </div>
 </div>
-<p>stationary !</p>
+<p>Based on the ADF test, since the p-value is smaller than the threshold value, we should reject the null hypothesis, which means that the dataset is stationary! However, the value is close to 0.05. In addition, the ADF test is not as reliable as the ACF test. Therefore, since the ACF decays slowly, and it showed strong correlation. This means that, the dataset is not stationary.</p>
+</section>
+<section id="detrened-and-log-transformation" class="level3">
+<h3 class="anchored" data-anchor-id="detrened-and-log-transformation">Detrened and Log-transformation</h3>
+<p>Then, to explore more, we utilize detrended and log-transformation to see about the patterns</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -495,9 +605,14 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>From here, we can see that after detrending, the household income remains fluctuations espectially during 2020 period, which could be the cause of the Covid-19. In addition, Log-transformed time series, in order to remove the hetroscadastisity, we can see that the trend remains. I think the reason is possibly because log-transformation can assuage issues related to non-constant variance, which means that the inherent trend within the data may persist.</p>
+</section>
 </section>
 <section id="the-gdp-exploratory-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="the-gdp-exploratory-data-analysis">The GDP Exploratory Data Analysis</h2>
+<p>Then, after making analysis for income, sale price, and houseing affordability. We should have a look at for analyzing the GDP, which can represent the economy as a whole. By analyzing the GDP data, we can have a more generalized view and gain more insights about the patterns, seasonalities, and stationaries.</p>
+<section id="time-series-plot-of-gdp" class="level3">
+<h3 class="anchored" data-anchor-id="time-series-plot-of-gdp">Time Series Plot of GDP</h3>
 <div class="cell">
 
 </div>
@@ -506,18 +621,30 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>From the plot, you can visually inspect:</p>
-<p>Trend: Any consistent upward or downward direction. Seasonality: Any repeating patterns or cycles. Variation: Fluctuations in the data. Periodic fluctuations: Spikes or drops at consistent intervals. Determine if the time series looks multiplicative or additive. An additive time series has constant amplitude and frequency, while a multiplicative one has varying amplitude/frequency.</p>
+<p>From the plot, we can visually inspect: Trend: It seems that it did not have a consistent trend. From 1960 to 1980, it has upwarding trend. But then it has dewarding trend. And has a huge fluctuations during 2020, Covid period. Which is similar to the houseing affordability index. I think we can see that there is a positive correlation between GDP and housing affordability index. When GDP gets higher, people can afford a house more easily. Seasonality: I think there are small patterns that show seasonality in dataset. Variation: Fluctuations in the data exist. Periodic fluctuations: Spikes or drops at consistent intervals exist. Multiplicative or additive: I think the dataset could follow a multiplicative pattern. Because it seems that it does not have constant amplitude and frequency. In order to prove these, we need to explore more using different methods.</p>
+</section>
+<section id="lag-for-gdp" class="level3">
+<h3 class="anchored" data-anchor-id="lag-for-gdp">Lag for GDP</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Based on the lag plot, there’s a correlation but not too strong. This shows potential linearity. However, it could also mean that the dataset is not stationary but we can not decide yet.</p>
+<p>In order to determine if the dataset is stationary. we should use other methods as well. Before doing that, we should first check the trend, seasonality through decompositions.</p>
+</section>
+<section id="decomposition-of-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="decomposition-of-the-data">Decomposition of the Data</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Now, based on the decomposition plot, we can see that it is correct that the data did not follow a specific trend. However, it seems that there is seasonal pattern involves with flutuations. In addition, it has almost constant amplitude/frequency. Therefore, I think this follows multiplicative.</p>
+<p>Then, we should utilize ACF and PACF to see about the correlation and stationary.</p>
+</section>
+<section id="acf-and-pacf" class="level3">
+<h3 class="anchored" data-anchor-id="acf-and-pacf">ACF and PACF</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid" width="672"></p>
@@ -526,6 +653,7 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-30-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>From here, we can see that the acf decays very quickly, which also means that it is stationary. In order to prove this conclusion, we utilize the adf test to ensure the results are the same.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -536,6 +664,11 @@ Dickey-Fuller = -3.8947, Lag order = 6, p-value = 0.01466
 alternative hypothesis: stationary</code></pre>
 </div>
 </div>
+<p>Based on the result, we can see that the p-value is smaller than the thershold value, this means that we reject the Null hypothesis. The time series dataset is stationary.</p>
+<p>Then, to explore more, we utilize detrended and log-transformation to see about the patterns</p>
+</section>
+<section id="detrended-and-log-transformation-1" class="level3">
+<h3 class="anchored" data-anchor-id="detrended-and-log-transformation-1">Detrended and Log-transformation</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid" width="672"></p>
@@ -547,8 +680,12 @@ alternative hypothesis: stationary</code></pre>
 </div>
 </div>
 </section>
-<section id="the-mean-sale-price-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="the-mean-sale-price-analysis">The Mean Sale Price Analysis</h2>
+</section>
+<section id="the-sale-price-disparity-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="the-sale-price-disparity-analysis">The Sale Price Disparity Analysis</h2>
+<p>Lastly, after analyzing the corresponding numeric datasets, we will explore more about the disparitis by using the Mean Sale price datasets which involves with different regions and states. From here, by making analysis on the pattern and seasonality, it can help us provide with more insights and knowledge in determining the impact of the disparities of the income and sale prices.</p>
+<section id="time-series-decomposition-plot" class="level3">
+<h3 class="anchored" data-anchor-id="time-series-decomposition-plot">Time Series Decomposition Plot</h3>
 <div class="cell">
 
 </div>
@@ -560,11 +697,21 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>From the decomposition plot, we can visually inspect: Trend: There is no clear trend. Seasonality: It seems that it has seasonal patterns. Variation: Fluctuations in the data exists. Periodic fluctuations: The fluctuations are randomly presented. multiplicative or additive： I think this follows multiplicative, because it has varying amplitude/frequency.</p>
+<p>Then, we want to see if there is any correlations. By utilizing lag plot, we can see if there are any correlations present:</p>
+</section>
+<section id="lag-plot-1" class="level3">
+<h3 class="anchored" data-anchor-id="lag-plot-1">Lag Plot</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-37-3.png" class="img-fluid" width="576"></p>
 </div>
 </div>
+<p>Based on the lag plot, there’s a strong positive correlation since the points cluster along a diagonal line from bottom-left to top-right. This shows linearity. However, it could also mean that the dataset is not stationary.</p>
+<p>In order to explore more, we utilize the acf and pacf to check the accuracy.</p>
+</section>
+<section id="acf-and-pacf-plots" class="level3">
+<h3 class="anchored" data-anchor-id="acf-and-pacf-plots">ACF and PACF plots</h3>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="EDA_files/figure-html/unnamed-chunk-38-5.png" class="img-fluid" width="960"></p>
@@ -573,6 +720,10 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-38-6.png" class="img-fluid" width="960"></p>
 </div>
 </div>
+<p>From here, we can see that the dataset has a correlation and decays slowly. Howeverm for PACF, it decays dramatically. Therefore, we can say that it is stationary. In order to prove this conclusion, we utilize the adf test to ensure the results are the same.</p>
+</section>
+<section id="adf-tests" class="level3">
+<h3 class="anchored" data-anchor-id="adf-tests">ADF tests</h3>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>ADF Statistic: -5.271328121414676</code></pre>
@@ -589,6 +740,11 @@ alternative hypothesis: stationary</code></pre>
     10%: -2.5682075189699822</code></pre>
 </div>
 </div>
+<p>Based on the result, we can see that the p-value is smaller than the thershold value, this means that we can reject the Null hypothesis. The time series dataset is stationary.</p>
+<p>Then, we wish to make analysis for different values to see if they have correlations among each other. A heatmap can also help us to determine the correlations among the sale price, rental price, and homevalue of the dataset.</p>
+</section>
+<section id="correlation-heatmap" class="level3">
+<h3 class="anchored" data-anchor-id="correlation-heatmap">Correlation heatmap</h3>
 <div class="cell">
 
 </div>
@@ -597,6 +753,19 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-41-9.png" class="img-fluid" width="960"></p>
 </div>
 </div>
+<p>From here, we can see that there is a strong positive correlation between the Sale price and home value. The higher of the home value, the higher of the sale price. However, the rental price did not have too much correlations with the other two. The possible reason could be the cause of the geographic difference and this could also affect the housing affordability.</p>
+<p>In conclusion, in this section, we provide different observations. And these observations underscore the nature of real estate pricing, incomes, GDP changes througout the years as well as the housing affordability. In addition, different patterns and features are found to identify the trend, seasonality, patterns, and correlations. which allow us to have a more understanding about the dataset.</p>
+</section>
+</section>
+<section id="references-and-codes" class="level1">
+<h1>References and Codes</h1>
+<ul>
+<li>Codes: <a href="https://github.com/zy236yuz5/ANLY5600-TimeSeries">Rmd, Python &amp; Qmd</a></li>
+<li>U.S. Bureau of Economic Analysis, Household saving [W398RC1A027NBEA], retrieved from FRED, Federal Reserve Bank of St.&nbsp;Louis; https://fred.stlouisfed.org/series/W398RC1A027NBEA, September 19, 2023.</li>
+<li>U.S. Census Bureau, Real Median Household Income in the United States [MEHOINUSA672N], retrieved from FRED, Federal Reserve Bank of St.&nbsp;Louis; https://fred.stlouisfed.org/series/MEHOINUSA672N, September 19, 2023.</li>
+<li>U.S. Bureau of Economic Analysis, Gross Domestic Product: Implicit Price Deflator [A191RI1Q225SBEA], retrieved from FRED, Federal Reserve Bank of St.&nbsp;Louis; https://fred.stlouisfed.org/series/A191RI1Q225SBEA, September 18, 2023.</li>
+<li>Zillow Group. Accessed April 19, 2023. “Zillow Research Data.” https://www.zillow.com/research/data/.</li>
+</ul>
 
 
 </section>
