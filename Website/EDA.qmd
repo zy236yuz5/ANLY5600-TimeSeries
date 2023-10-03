@@ -204,7 +204,34 @@ ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
 
 ```
 
-From here, we can see that after detrending, the household income remains fluctuations espectially during 2020 period, which could be the cause of the Covid-19. In addition, Log-transformed time series, in order to remove the hetroscadastisity, we can see that the trend remains. I think the reason is possibly because log-transformation can assuage issues related to non-constant variance, which means that the inherent trend within the data may persist.
+From here, we can see that after detrending and dfferencing, the household income remains fluctuations espectially during 2020 period, which could be the cause of the Covid-19. In addition, Log-transformed time series, in order to remove the hetroscadastisity, we can see that the trend remains. I think the reason is possibly because log-transformation can assuage issues related to non-constant variance, which means that the inherent trend within the data may persist.
+
+### Make it Stationary by using differencing
+```{r}
+diff_series <- diff(df$W398RC1A027NBEA)
+
+# Plotting the differenced series
+ggplot(data = data.frame(Date = df$DATE[-1], Diff = diff_series), aes(x = Date, y = Diff)) +
+  geom_line(color = "blue") +
+  labs(title = "Differenced Household Income Time Series",
+       x = "Date",
+       y = "Differenced Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# ACF Plot for differenced series
+ggAcf(diff_series) +
+  labs(title = "ACF of Differenced Household Income Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+From here, we can see that after detrending and dfferencing has succeeded in making the datasets stationary: spikes all fall within the blue shaded confidence intervals, which represent the region where correlations are not statistically significant.
 
 
 ## The Median House Sale Price Data Analysis
@@ -363,6 +390,33 @@ ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
 
 From here, we can see that after detrending, the sale prices remains fluctuations espectially from 2000 to 2020 period. In addition, Log-transformed time series, in order to remove the hetroscadastisity, we can see that the trend remains. I think the reason is possibly because log-transformation can assuage issues related to non-constant variance, which means that the inherent trend within the data may persist.
 
+### Make it Stationary by using differencing
+```{r}
+diff_series <- diff(df$MSPUS)
+
+# Plotting the differenced series
+ggplot(data = data.frame(Date = df$DATE[-1], Diff = diff_series), aes(x = Date, y = Diff)) +
+  geom_line(color = "blue") +
+  labs(title = "Differenced Sale Price Time Series",
+       x = "Date",
+       y = "Differenced Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# ACF Plot for differenced series
+ggAcf(diff_series) +
+  labs(title = "ACF of Differenced Sale Price Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+From here, we can see that after detrending and dfferencing has succeeded in making the datasets stationary: Most of the spikes fall within the blue shaded confidence intervals, which means that the dataset is stationary now compared to the orginal one.
+
 ## The Housing Affordability Index Data Analysis
 
 Then, after we have a basic understanding about the income and sale price. We need to dive into the impact. We utilize the housing affordability index to see the impact of the income and sale price. Let us firt explore the houseing affordability index first.
@@ -517,6 +571,34 @@ ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
 
 From here, we can see that after detrending, the household income remains fluctuations espectially during 2020 period, which could be the cause of the Covid-19. In addition, Log-transformed time series, in order to remove the hetroscadastisity, we can see that the trend remains. I think the reason is possibly because log-transformation can assuage issues related to non-constant variance, which means that the inherent trend within the data may persist.
 
+### ENsure it Stationary by using differencing
+```{r}
+diff_series <- diff(df$PSAVERT)
+
+# Plotting the differenced series
+ggplot(data = data.frame(Date = df$DATE[-1], Diff = diff_series), aes(x = Date, y = Diff)) +
+  geom_line(color = "blue") +
+  labs(title = "Differenced Housing Affordability IndexTime Series",
+       x = "Date",
+       y = "Differenced Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# ACF Plot for differenced series
+ggAcf(diff_series) +
+  labs(title = "ACF of Differenced Housing Affordability Index Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+From here, we can see that after detrending and dfferencing has succeeded in making the datasets stationary: Most of the spikes fall within the blue shaded confidence intervals, which means that the dataset is stationary now compared to the orginal one.
+
+
 ## The GDP Exploratory Data Analysis
 
 Then, after making analysis for income, sale price, and houseing affordability. We should have a look at for analyzing the GDP, which can represent the economy as a whole. By analyzing the GDP data, we can have a more generalized view and gain more insights about the patterns, seasonalities, and stationaries.
@@ -656,6 +738,9 @@ ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
 
 ```
 
+Since, the original dataset is already stationary. Therefore, no further action is needed to make it stationary. The detrend and log transformation is just to explore the dataset.
+
+
 ## The Sale Price Disparity Analysis
 
 Lastly, after analyzing the corresponding numeric datasets, we will explore more about the disparitis by using the Mean Sale price datasets which involves with different regions and states. From here, by making analysis on the pattern and seasonality, it can help us provide with more insights and knowledge in determining the impact of the disparities of the income and sale prices.
@@ -722,7 +807,7 @@ plt.show()
 
 ```
 
-Based on the lag plot, there's a strong positive correlation since the points cluster along a diagonal line from bottom-left to top-right. This shows linearity. However, it could also mean that the dataset is not stationary.
+Based on the lag plot, there's a strong positive correlation since the points cluster along a diagonal line from bottom-left to top-right. This shows linearity. 
 
 In order to explore more, we utilize the acf and pacf to check the accuracy.
 
