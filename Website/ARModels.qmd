@@ -346,7 +346,11 @@ ggPacf(diff_series) + theme_demo
 
 From the PACF plot, it seems that after the 1st lag, the correlation values drop into insignificance. Thus, we might consider p = 1 for the AR component. From the ACF plot you provided, the correlation seems to cut off after the 1st lag as well. Hence, you might consider q = 2 for the MA component. And we use d = 3 since we utilized third orders of differencing.
 
-### Fit model
+
+
+
+
+### Fit Model
 
 After we determing our parameters, we can start fitting the models.
 ```{r, echo = FALSE}
@@ -358,6 +362,14 @@ summary(model)
 ```
 
 From here, we get a summary about the aic and bic values.
+
+### Equation of the Model
+
+Given the specified values \(p = 1\), \(q = 2\), and \(d = 3\), we can write out the ARIMA(1,3,2) model equation using the general equation based on the results of the model:
+
+\[ X_t = c + \phi_1X_{t-1} + \theta_1a_{t-1} + \theta_2a_{t-2} + a_t \]
+
+In my case the third difference is represented as \( \nabla^3 Y_t = Y_t - 0.7911Y_{t-1} - 1.8982Y_{t-2} + 0.9996Y_{t-3} \). The ARIMA equation provided is built upon this differenced series.
 
 ### Model diagnostics
 
@@ -819,6 +831,14 @@ model <- Arima(diff, order=c(1,1,1))
 summary(model)
 
 ```
+
+### Equation of the Model
+
+Given the specified values \(p = 1\), \(q = 1\), and \(d = 1\), we can write out the ARIMA(1,1,1) model equation using the general equation based on the results of the model:
+
+\[ X_t = c + \phi_1X_{t-1} + \theta_1a_{t-1} + \theta_2a_{t-2} + a_t \]
+
+In my case the third difference is represented as \( \nabla^1 X_t = X_t + 0.0092X_{t-1} - 0.9827Y_{t-1} \). The ARIMA equation provided is built upon this differenced series.
 
 ### Model diagnostics
 
