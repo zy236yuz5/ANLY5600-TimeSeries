@@ -210,6 +210,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#validation-with-adf-test" id="toc-validation-with-adf-test" class="nav-link" data-scroll-target="#validation-with-adf-test">Validation with ADF Test</a></li>
   <li><a href="#detrended-and-log-transformed" id="toc-detrended-and-log-transformed" class="nav-link" data-scroll-target="#detrended-and-log-transformed">Detrended and Log-transformed</a></li>
   <li><a href="#make-it-stationary-by-using-differencing" id="toc-make-it-stationary-by-using-differencing" class="nav-link" data-scroll-target="#make-it-stationary-by-using-differencing">Make it Stationary by using differencing</a></li>
+  <li><a href="#moving-average" id="toc-moving-average" class="nav-link" data-scroll-target="#moving-average">Moving Average</a></li>
   </ul></li>
   <li><a href="#the-median-house-sale-price-data-analysis" id="toc-the-median-house-sale-price-data-analysis" class="nav-link" data-scroll-target="#the-median-house-sale-price-data-analysis">The Median House Sale Price Data Analysis</a>
   <ul class="collapse">
@@ -220,6 +221,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#adf-test" id="toc-adf-test" class="nav-link" data-scroll-target="#adf-test">ADF Test</a></li>
   <li><a href="#detrended-and-log-transformation" id="toc-detrended-and-log-transformation" class="nav-link" data-scroll-target="#detrended-and-log-transformation">Detrended and Log transformation</a></li>
   <li><a href="#make-it-stationary-by-using-differencing-1" id="toc-make-it-stationary-by-using-differencing-1" class="nav-link" data-scroll-target="#make-it-stationary-by-using-differencing-1">Make it Stationary by using differencing</a></li>
+  <li><a href="#moving-average-1" id="toc-moving-average-1" class="nav-link" data-scroll-target="#moving-average-1">Moving Average</a></li>
   </ul></li>
   <li><a href="#the-housing-affordability-index-data-analysis" id="toc-the-housing-affordability-index-data-analysis" class="nav-link" data-scroll-target="#the-housing-affordability-index-data-analysis">The Housing Affordability Index Data Analysis</a>
   <ul class="collapse">
@@ -230,6 +232,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#adf-test-1" id="toc-adf-test-1" class="nav-link" data-scroll-target="#adf-test-1">ADF Test</a></li>
   <li><a href="#detrened-and-log-transformation" id="toc-detrened-and-log-transformation" class="nav-link" data-scroll-target="#detrened-and-log-transformation">Detrened and Log-transformation</a></li>
   <li><a href="#ensure-it-stationary-by-using-differencing" id="toc-ensure-it-stationary-by-using-differencing" class="nav-link" data-scroll-target="#ensure-it-stationary-by-using-differencing">ENsure it Stationary by using differencing</a></li>
+  <li><a href="#moving-average-2" id="toc-moving-average-2" class="nav-link" data-scroll-target="#moving-average-2">Moving Average</a></li>
   </ul></li>
   <li><a href="#the-gdp-exploratory-data-analysis" id="toc-the-gdp-exploratory-data-analysis" class="nav-link" data-scroll-target="#the-gdp-exploratory-data-analysis">The GDP Exploratory Data Analysis</a>
   <ul class="collapse">
@@ -238,6 +241,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#decomposition-of-the-data" id="toc-decomposition-of-the-data" class="nav-link" data-scroll-target="#decomposition-of-the-data">Decomposition of the Data</a></li>
   <li><a href="#acf-and-pacf" id="toc-acf-and-pacf" class="nav-link" data-scroll-target="#acf-and-pacf">ACF and PACF</a></li>
   <li><a href="#detrended-and-log-transformation-1" id="toc-detrended-and-log-transformation-1" class="nav-link" data-scroll-target="#detrended-and-log-transformation-1">Detrended and Log-transformation</a></li>
+  <li><a href="#moving-average-3" id="toc-moving-average-3" class="nav-link" data-scroll-target="#moving-average-3">Moving Average</a></li>
   </ul></li>
   <li><a href="#the-sale-price-disparity-analysis" id="toc-the-sale-price-disparity-analysis" class="nav-link" data-scroll-target="#the-sale-price-disparity-analysis">The Sale Price Disparity Analysis</a>
   <ul class="collapse">
@@ -246,6 +250,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#acf-and-pacf-plots" id="toc-acf-and-pacf-plots" class="nav-link" data-scroll-target="#acf-and-pacf-plots">ACF and PACF plots</a></li>
   <li><a href="#adf-tests" id="toc-adf-tests" class="nav-link" data-scroll-target="#adf-tests">ADF tests</a></li>
   <li><a href="#correlation-heatmap" id="toc-correlation-heatmap" class="nav-link" data-scroll-target="#correlation-heatmap">Correlation heatmap</a></li>
+  <li><a href="#moving-average-4" id="toc-moving-average-4" class="nav-link" data-scroll-target="#moving-average-4">Moving Average</a></li>
   </ul></li>
   <li><a href="#references-and-codes" id="toc-references-and-codes" class="nav-link" data-scroll-target="#references-and-codes">References and Codes</a></li>
   </ul>
@@ -390,6 +395,11 @@ alternative hypothesis: stationary</code></pre>
 </div>
 <p>From here, we can see that after detrending and dfferencing has succeeded in making the datasets stationary: spikes all fall within the blue shaded confidence intervals, which represent the region where correlations are not statistically significant.</p>
 </section>
+<section id="moving-average" class="level3">
+<h3 class="anchored" data-anchor-id="moving-average">Moving Average</h3>
+<iframe src="./image/EDA/income.html" width="840" height="600">
+</iframe>
+</section>
 </section>
 <section id="the-median-house-sale-price-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="the-median-house-sale-price-data-analysis">The Median House Sale Price Data Analysis</h2>
@@ -504,6 +514,11 @@ alternative hypothesis: stationary</code></pre>
 </div>
 </div>
 <p>From here, we can see that after detrending and dfferencing has succeeded in making the datasets stationary: Most of the spikes fall within the blue shaded confidence intervals, which means that the dataset is stationary now compared to the orginal one.</p>
+</section>
+<section id="moving-average-1" class="level3">
+<h3 class="anchored" data-anchor-id="moving-average-1">Moving Average</h3>
+<iframe src="./image/EDA/HSP.html" width="840" height="600">
+</iframe>
 </section>
 </section>
 <section id="the-housing-affordability-index-data-analysis" class="level2">
@@ -721,6 +736,11 @@ alternative hypothesis: stationary</code></pre>
 </div>
 <p>From here, we can see that after detrending and dfferencing has succeeded in making the datasets stationary: Most of the spikes fall within the blue shaded confidence intervals, which means that the dataset is stationary now compared to the orginal one.</p>
 </section>
+<section id="moving-average-2" class="level3">
+<h3 class="anchored" data-anchor-id="moving-average-2">Moving Average</h3>
+<iframe src="./image/EDA/idex.html" width="840" height="600">
+</iframe>
+</section>
 </section>
 <section id="the-gdp-exploratory-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="the-gdp-exploratory-data-analysis">The GDP Exploratory Data Analysis</h2>
@@ -795,6 +815,11 @@ alternative hypothesis: stationary</code></pre>
 </div>
 <p>Since, the original dataset is already stationary. Therefore, no further action is needed to make it stationary. The detrend and log transformation is just to explore the dataset.</p>
 </section>
+<section id="moving-average-3" class="level3">
+<h3 class="anchored" data-anchor-id="moving-average-3">Moving Average</h3>
+<iframe src="./image/EDA/gdpma.html" width="840" height="600">
+</iframe>
+</section>
 </section>
 <section id="the-sale-price-disparity-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="the-sale-price-disparity-analysis">The Sale Price Disparity Analysis</h2>
@@ -868,6 +893,17 @@ alternative hypothesis: stationary</code></pre>
 <p><img src="EDA_files/figure-html/unnamed-chunk-44-9.png" class="img-fluid" width="960"></p>
 </div>
 </div>
+</section>
+<section id="moving-average-4" class="level3">
+<h3 class="anchored" data-anchor-id="moving-average-4">Moving Average</h3>
+<iframe src="./image/EDA/s1.html" width="840" height="600">
+</iframe>
+<iframe src="./image/EDA/s2.html" width="840" height="600">
+</iframe>
+<iframe src="./image/EDA/h1.html" width="840" height="600">
+</iframe>
+<iframe src="./image/EDA/h2.html" width="840" height="600">
+</iframe>
 <p>From here, we can see that there is a strong positive correlation between the Sale price and home value. The higher of the home value, the higher of the sale price. However, the rental price did not have too much correlations with the other two. The possible reason could be the cause of the geographic difference and this could also affect the housing affordability.</p>
 <p>In conclusion, in this section, we provide different observations. And these observations underscore the nature of real estate pricing, incomes, GDP changes througout the years as well as the housing affordability. In addition, different patterns and features are found to identify the trend, seasonality, patterns, and correlations. which allow us to have a more understanding about the dataset.</p>
 </section>

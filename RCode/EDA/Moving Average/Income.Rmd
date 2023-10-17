@@ -1,0 +1,237 @@
+---
+title: "datavis"
+author: "Zonghong Yu"
+date: "2023-09-18"
+output: html_document
+---
+
+```{r}
+library(reticulate)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(xts)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+library(plotly)
+library(TTR) # For the SMA function
+
+```
+
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df <- read.csv("../../../Dataset/project/household_saving.csv")
+df$DATE <- as.Date(df$DATE)
+head(df)
+```
+
+```{r,warning=FALSE,echo=FALSE}
+library(ggplot2)
+
+
+ggplot(data = df, aes(x = DATE, y = W398RC1A027NBEA)) +
+  geom_line(color = "DarkViolet") +
+  labs(title = "Time Series Plot of Household Income",
+       x = "Date", 
+       y = "The Household Income") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+```
+
+
+
+```{r}
+# Calculate Moving Averages
+df$MA2 <- SMA(df$W398RC1A027NBEA, n=2)
+df$MA4 <- SMA(df$W398RC1A027NBEA, n=4)
+df$MA8 <- SMA(df$W398RC1A027NBEA, n=8)
+
+```
+
+
+```{r}
+
+fig <- df %>%
+  plot_ly(type = "scatter", mode = "lines") %>%
+  add_lines(x = ~DATE, y = ~W398RC1A027NBEA, name = 'Original', line = list(color = 'blue')) %>%
+  add_lines(x = ~DATE, y = ~MA2, name = 'MA(2)', line = list(color = 'red', dash = 'dash')) %>%
+  add_lines(x = ~DATE, y = ~MA4, name = 'MA(4)', line = list(color = 'green', dash = 'dash')) %>%
+  add_lines(x = ~DATE, y = ~MA8, name = 'MA(8)', line = list(color = 'purple', dash = 'dash')) %>%
+  layout(title = "Moving Average Smoothing For Household Income",
+         xaxis = list(title = "Date"),
+         yaxis = list(title = "Household Income"),
+         plot_bgcolor = '#E0E0E0',  # background color of the plotting area
+         paper_bgcolor = '#E0E0E0', # background color of the entire plot (around the plotting area)
+         legend = list(title = list(text = "Household Income"),
+                       itemsizing = "constant")
+         )
+
+# Display the plot
+fig
+
+```
+
+```{r, echo=FALSE}
+library(plotly)
+htmlwidgets::saveWidget(fig, "../../../image/EDA/income.html")
+```
+
+
+
+
+
+
+
+# GDP EDA Section
+
+```{r,warning=FALSE}
+library(ggplot2)
+
+
+ggplot(data = df, aes(x = DATE, y = A191RI1Q225SBEA)) +
+  geom_line(color = "blue") +
+  labs(title = "Time Series Plot of GDP",
+       x = "Date", 
+       y = "Percent Change from Preceding Period") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+```
+From the plot, you can visually inspect:
+
+Trend: Any consistent upward or downward direction.
+Seasonality: Any repeating patterns or cycles.
+Variation: Fluctuations in the data.
+Periodic fluctuations: Spikes or drops at consistent intervals.
+Determine if the time series looks multiplicative or additive. An additive time series has constant amplitude and frequency, while a multiplicative one has varying amplitude/frequency.
+
+```{r}
+# Lag plot
+lagged_data <- data.frame(value = df$A191RI1Q225SBEA[-1],
+                          lagged_value = df$A191RI1Q225SBEA[-length(df$A191RI1Q225SBEA)])
+
+# Enhanced Lag Plot
+ggplot(data = lagged_data, aes(x = lagged_value, y = value)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  labs(title = "Lag Plot (lag=1)",
+       x = "Value at t-1",
+       y = "Value at t") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+
+```
+You'd interpret the lag plot by looking for any structure. If the points cluster along a diagonal line from bottom-left to top-right, there's a positive correlation. Any other pattern might suggest non-linearity or some pattern not captured by mere linear correlation
+
+```{r}
+#library(ggfortify)
+
+# Decomposition using ggplot2 styling
+decomposed <- decompose(ts(df$A191RI1Q225SBEA, frequency=12), type = "additive")
+autoplot(decomposed) + 
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+```{r}
+library(forecast)
+
+# ACF Plot
+ggAcf(df$A191RI1Q225SBEA) +
+  labs(title = "ACF of GDP Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# PACF Plot
+ggPacf(df$A191RI1Q225SBEA) +
+  labs(title = "PACF of GDP Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+The ACF plot can help determine if the series is stationary. If the series is non-stationary, the ACF will decay slowly, while for a stationary series, the ACF will drop off quickly
+
+```{r}
+
+# ACF and PACF
+acf(df$A191RI1Q225SBEA)
+pacf(df$A191RI1Q225SBEA)
+
+```
+
+```{r}
+library(tseries)
+adf.test(df$A191RI1Q225SBEA)
+
+
+```
+
+stationary !
+
+```{r}
+detrended_data <- data.frame(Date = df$DATE[-1], Detrended = diff(df$A191RI1Q225SBEA))
+
+# Enhanced Detrended Plot
+ggplot(data = detrended_data, aes(x = Date, y = Detrended)) +
+  geom_line(color = "blue") +
+  labs(title = "Detrended Time Series",
+       x = "Date",
+       y = "Detrended Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+```{r}
+log_transformed <- log(df$A191RI1Q225SBEA)
+plot(log_transformed, main = "Log-transformed Time Series")
+
+```
+
+```{r,warning=FALSE}
+log_transformed_data <- data.frame(Date = df$DATE, LogTransformed = log(df$A191RI1Q225SBEA))
+
+# Enhanced Log-transformed Plot with Custom Background
+ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
+  geom_line(color = "blue") +
+  labs(title = "Log-transformed Time Series of GDP",
+       x = "Date",
+       y = "Log-transformed Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+

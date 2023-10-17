@@ -234,6 +234,12 @@ ggAcf(diff_series) +
 From here, we can see that after detrending and dfferencing has succeeded in making the datasets stationary: spikes all fall within the blue shaded confidence intervals, which represent the region where correlations are not statistically significant.
 
 
+### Moving Average
+
+<iframe src="./image/EDA/income.html" width="840" height="600"></iframe>
+
+
+
 ## The Median House Sale Price Data Analysis
 
 Since our key is to discover the impact of the income and house price, we certainly need to make analysis for the sale price data. 
@@ -263,6 +269,7 @@ ggplot(data = df, aes(x = DATE, y = MSPUS)) +
 
 
 ```
+
 From the plot, the results are the same with the previous section. It has an upwarding trend. 
 
 To be more specific, from the plot, we can visually inspect:
@@ -416,6 +423,11 @@ ggAcf(diff_series) +
 ```
 
 From here, we can see that after detrending and dfferencing has succeeded in making the datasets stationary: Most of the spikes fall within the blue shaded confidence intervals, which means that the dataset is stationary now compared to the orginal one.
+
+### Moving Average
+
+<iframe src="./image/EDA/HSP.html" width="840" height="600"></iframe>
+
 
 ## The Housing Affordability Index Data Analysis
 
@@ -598,6 +610,9 @@ ggAcf(diff_series) +
 
 From here, we can see that after detrending and dfferencing has succeeded in making the datasets stationary: Most of the spikes fall within the blue shaded confidence intervals, which means that the dataset is stationary now compared to the orginal one.
 
+### Moving Average
+
+<iframe src="./image/EDA/idex.html" width="840" height="600"></iframe>
 
 ## The GDP Exploratory Data Analysis
 
@@ -740,6 +755,9 @@ ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
 
 Since, the original dataset is already stationary. Therefore, no further action is needed to make it stationary. The detrend and log transformation is just to explore the dataset.
 
+### Moving Average
+
+<iframe src="./image/EDA/gdpma.html" width="840" height="600"></iframe>
 
 ## The Sale Price Disparity Analysis
 
@@ -885,6 +903,17 @@ plt.title('Correlation Heatmap')
 plt.show()
 
 ```
+
+
+### Moving Average
+
+<iframe src="./image/EDA/s1.html" width="840" height="600"></iframe>
+
+<iframe src="./image/EDA/s2.html" width="840" height="600"></iframe>
+
+<iframe src="./image/EDA/h1.html" width="840" height="600"></iframe>
+
+<iframe src="./image/EDA/h2.html" width="840" height="600"></iframe>
 
 From here, we can see that there is a strong  positive correlation between the Sale price and home value. The higher of the home value, the higher of the sale price. However, the rental price did not have too much correlations with the other two. The possible reason could be the cause of the geographic difference and this could also affect the housing affordability.
 

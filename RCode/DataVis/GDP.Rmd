@@ -5,15 +5,6 @@ date: "2023-09-18"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r}
-install.packages("reticulate")
-
-```
-
 ```{r}
 library(reticulate)
 library(ggplot2)
@@ -31,6 +22,130 @@ library(tidyquant)
 library(plotly)
 library(ggplot2)
 library(lubridate)
+library(plotly)
+library(TTR) # For the SMA function
+
+```
+
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df <- read.csv("../../Dataset/project/household_saving.csv")
+df$DATE <- as.Date(df$DATE)
+head(df)
+```
+
+```{r,warning=FALSE,echo=FALSE}
+library(ggplot2)
+
+
+ggplot(data = df, aes(x = DATE, y = W398RC1A027NBEA)) +
+  geom_line(color = "DarkViolet") +
+  labs(title = "Time Series Plot of Household Income",
+       x = "Date", 
+       y = "The Household Income") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+```
+```{r}
+# Calculate Moving Averages
+df$MA2 <- SMA(df$W398RC1A027NBEA, n=2)
+df$MA4 <- SMA(df$W398RC1A027NBEA, n=4)
+df$MA8 <- SMA(df$W398RC1A027NBEA, n=8)
+
+```
+
+
+```{r}
+
+fig <- df %>%
+  plot_ly(x = ~DATE, type = "scatter", mode = "lines") %>%
+  add_lines(y = ~W398RC1A027NBEA, name = 'Original', line = list(color = 'blue')) %>%
+  add_lines(y = ~MA2, name = 'MA(2)', line = list(color = 'red', dash = 'dash')) %>%
+  add_lines(y = ~MA4, name = 'MA(4)', line = list(color = 'green', dash = 'dash')) %>%
+  add_lines(y = ~MA8, name = 'MA(8)', line = list(color = 'purple', dash = 'dash')) %>%
+  layout(title = "Moving Average Smoothing",
+         xaxis = list(title = "Date"),
+         yaxis = list(title = "W398RC1A027NBEA"),
+         plot_bgcolor = '#E0E0E0',  # background color of the plotting area
+         paper_bgcolor = '#E0E0E0', # background color of the entire plot (around the plotting area)
+         legend = list(title = list(text = "W398RC1A027NBEA Data"),
+                       itemsizing = "constant")
+         )
+
+# Display the plot
+fig
+
+```
+
+
+```{r}
+# Assuming df has been loaded as per your snippet
+
+# Load necessary library
+library(ggplot2)
+
+# MA function to calculate moving averages
+ma_function <- function(data, window){
+  stats::filter(data, rep(1/window, window), sides=2)
+}
+
+# Window sizes for moving average
+windows <- c(2, 4, 8)  # Example windows, you can adjust them as per your needs
+
+# Create a plot
+ggplot(df, aes(x=DATE)) +
+  geom_line(aes(y=W398RC1A027NBEA), colour="blue", linetype="dotted") +
+  geom_line(aes(y=ma_function(W398RC1A027NBEA, windows[1])), colour="red") +
+  geom_line(aes(y=ma_function(W398RC1A027NBEA, windows[2])), colour="green") +
+  geom_line(aes(y=ma_function(W398RC1A027NBEA, windows[3])), colour="purple") +
+  labs(title="Moving Average Smoothing",
+       subtitle="Using window sizes: 2 (red), 4 (green), 8 (purple)",
+       y="W398RC1A027NBEA",
+       x="Date") +
+  theme_minimal()
+
+
+```
+```{r}
+
+library(plotly)
+
+```
+
+```{r}
+ma_function <- function(data, window){
+  stats::filter(data, rep(1/window, window), sides=2)
+}
+
+```
+
+```{r}
+windows <- c(5, 10, 20)
+
+ma_2 <- ma_function(df$W398RC1A027NBEA, windows[1])
+ma_4 <- ma_function(df$W398RC1A027NBEA, windows[2])
+ma_8 <- ma_function(df$W398RC1A027NBEA, windows[3])
+
+```
+
+```{r}
+p <- plot_ly(df, x = ~DATE, type='scatter', mode='lines') %>%
+  add_lines(y = ~W398RC1A027NBEA, name='Original', line=list(color='blue')) %>%
+  add_lines(y = ~ma_2, name='MA(2)', line=list(color='red')) %>%
+  add_lines(y = ~ma_4, name='MA(4)', line=list(color='green')) %>%
+  add_lines(y = ~ma_8, name='MA(8)', line=list(color='purple')) %>%
+  layout(title="Moving Average Smoothing",
+         xaxis=list(title="Date"),
+         yaxis=list(title="W398RC1A027NBEA"))
+
+# Show plot
+p
+
 ```
 
 
@@ -213,6 +328,14 @@ ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
         panel.grid.major = element_line(color = "grey", size = 0.1),
         panel.grid.minor = element_line(color = "grey", size = 0.05),
         plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+
+# Moving Average
+```{r}
+
 
 ```
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

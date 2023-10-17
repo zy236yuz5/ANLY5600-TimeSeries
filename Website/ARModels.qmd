@@ -21,7 +21,1070 @@ format:
   html:
     theme: sandstone
     css: ./styles/layout.css
+    code-fold: true
     toc: true
 ---
 
-work in progress
+After Exploratory Data Analysis (EDA), we are going to have a deeper understanding of the time series data by applying different models. This section involves multiple medthods and datasets with different models such as ARMA, ARIMA, SARIMA for us to gain insights and understandings such as ACF, PACF, ADF tests, differencing, and comparision. For these methods, we are going to identify correlations, stationaries, and performance evaluation. 
+
+To be more specific, we need to understand the concepts about the models:
+Certainly! Here's a brief overview of the ARMA, ARIMA, and SARIMA models with their associated equations:
+
+1. **ARMA**:
+
+   - **Components**:
+     - **AR(p)**: AutoRegressive term of order \( p \). It describes the relationship of the current observation with its previous values.
+     - **MA(q)**: Moving Average term of order \( q \). It captures the relationship between an observation and the white noise or error terms from previous time points.
+     
+   - **Equation**:
+     \[
+     X_t = c + \phi_1X_{t-1} + \phi_2X_{t-2} + \dots + \phi_pX_{t-p} + \theta_1a_{t-1} + \theta_2a_{t-2} + \dots + \theta_qa_{t-q} + a_t
+     \]
+     where \( a_t \) is white noise.
+
+2. **ARIMA**:
+
+   - **Components**:
+     - **AR(p)**: AutoRegressive term.
+     - **I(d)**: Integrated term of order \( d \). It represents the number of differences needed to make the series stationary.
+     - **MA(q)**: Moving Average term.
+     
+   - **Equation**:
+     Once the series is differenced \( d \) times and becomes stationary, its ARIMA representation becomes the same as ARMA, but applied to the differenced series.
+
+3. **SARIMA**:
+
+   - **Components**:
+     - **AR(p)**: AutoRegressive term.
+     - **I(d)**: Integrated term.
+     - **MA(q)**: Moving Average term.
+     - **SAR(P)**: Seasonal AutoRegressive term of order \( P \).
+     - **SI(D)**: Seasonal Integrated term of order \( D \). It indicates the number of seasonal differences required.
+     - **SMA(Q)**: Seasonal Moving Average term of order \( Q \).
+     
+   - **Equation**:
+     The SARIMA model combines both non-seasonal and seasonal components. Once both seasonal and non-seasonal differencing are applied (if needed), the SARIMA equation becomes an extension of the ARMA equation but with additional seasonal terms.
+     \[
+     X_t = c + \phi_1X_{t-1} + \dots + \phi_pX_{t-p} + \theta_1a_{t-1} + \dots + \theta_qa_{t-q} + \Phi_1X_{t-P} + \dots + \Phi_PX_{t-PS} + \Theta_1a_{t-Q} + \dots + \Theta_Qa_{t-QS} + a_t
+     \]
+     where \( S \) represents the seasonal period and \( a_t \) is white noise.
+
+
+
+
+## The Household Income Data Analysis
+
+Due to the differencing methods should be used when the dataset is not stationary. Here, as in EDA section, the household income data analysis provides results that this dataset is not stationary. To have a brief recap, I have provided the orginal dataset and the acf and pacf plots.
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(reticulate)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(xts)
+library(tseries)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(forecast)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+library(gridExtra)
+library(plotly)
+library(TTR) # For the SMA function
+
+```
+
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df <- read.csv("../Dataset/project/household_saving.csv")
+df$DATE <- as.Date(df$DATE)
+head(df)
+```
+
+```{r,warning=FALSE,echo=FALSE}
+library(ggplot2)
+
+
+ggplot(data = df, aes(x = DATE, y = W398RC1A027NBEA)) +
+  geom_line(color = "DarkViolet") +
+  labs(title = "Time Series Plot of Household Income",
+       x = "Date", 
+       y = "The Household Income") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+```
+
+
+
+
+
+
+### ACF & PACF
+```{r, echo=FALSE}
+library(forecast)
+
+# ACF Plot
+ggAcf(df$W398RC1A027NBEA) +
+  labs(title = "ACF of Household Income Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# PACF Plot
+ggPacf(df$W398RC1A027NBEA) +
+  labs(title = "PACF of Household Income Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+From here, we can see that the dataset has a correlation, which also means that it is not stationary. In order to prove this conclusion, we utilize the adf test to ensure the results are the same.
+
+
+### Validation with ADF Test
+```{r, echo=FALSE}
+library(tseries)
+adf.test(df$W398RC1A027NBEA)
+
+
+```
+
+Based on the result, we can see that the p-value is greater than the thershold value, this means that we fail to reject the Null hypothesis. The time series dataset is not stationary.
+
+Then, to explore more, we utilize detrended and log-transformation to see about the patterns
+
+
+### Detrended and Log-transformed
+```{r, echo=FALSE}
+detrended_data <- data.frame(Date = df$DATE[-1], Detrended = diff(df$W398RC1A027NBEA))
+
+# Enhanced Detrended Plot
+ggplot(data = detrended_data, aes(x = Date, y = Detrended)) +
+  geom_line(color = "blue") +
+  labs(title = "Detrended Household Income Time Series",
+       x = "Date",
+       y = "Detrended Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+```{r,warning=FALSE, echo=FALSE}
+log_transformed_data <- data.frame(Date = df$DATE, LogTransformed = log(df$W398RC1A027NBEA))
+
+# Enhanced Log-transformed Plot with Custom Background
+ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
+  geom_line(color = "blue") +
+  labs(title = "Log-transformed Time Series of Household Income",
+       x = "Date",
+       y = "Log-transformed Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+From here, we can see that after detrending and transforming, the household income remains fluctuations espectially during 2020 period, which could be the cause of the Covid-19. In addition, Log-transformed time series, in order to remove the hetroscadastisity, we can see that the trend remains. I think the reason is possibly because log-transformation can assuage issues related to non-constant variance, which means that the inherent trend within the data may persist.
+
+### Test it stationary again
+```{r, echo=FALSE}
+
+adf.test(log_transformed_data$LogTransformed)
+
+
+```
+
+After the detrending and transformating, we can see that it is still not statinary. Which means that further action still needs to be done. I utilize differencing methods.
+
+```{r, echo = FALSE}
+fit = lm(df$W398RC1A027NBEA~time(df$W398RC1A027NBEA), na.action=NULL) 
+
+```
+
+### Make it Stationary by using differencing
+
+We will try the second order differencing to see the result since the dataset seems to be overly not stationary.
+
+```{r, echo = FALSE}
+#install.packages("gridExtra")
+
+```
+
+```{r, echo = FALSE}
+
+t = ts(diff(diff(df$W398RC1A027NBEA)))
+# Create the time series plot with the desired background and borders
+ts_plot <- autoplot(t) +
+  labs(title = "Time Series Plot With two Orders of Differencing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Extract the ACF and PACF plots without the theme
+acf_plot <- ggAcf(diff(diff(diff(df$W398RC1A027NBEA)))) +
+  labs(title = "ACF for two Orders of Differencing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(diff(diff(diff(df$W398RC1A027NBEA)))) +
+  labs(title = "PACF for two Orders of Differencing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(ts_plot, acf_plot, pacf_plot, ncol = 1)
+
+```
+
+After the second orders of differencing, we can see the changes regarding the plots as a whole.
+
+
+```{r, warning=FALSE, echo = FALSE}
+adf.test(diff(df$W398RC1A027NBEA, differences = 2))
+
+
+```
+
+However, the second order of differencing still cannot make it stationary.
+We need to do more. However, we should reach the limit with the third order since we do not want to over differencing the dataset.
+
+### Third Differencing
+```{r, echo = FALSE}
+
+t = ts(diff(diff(diff(df$W398RC1A027NBEA))))
+# Create the time series plot with the desired background and borders
+ts_plot <- autoplot(t) +
+  labs(title = "Time Series Plot With three Orders of Differencing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Extract the ACF and PACF plots without the theme
+acf_plot <- ggAcf(diff(diff(diff(df$W398RC1A027NBEA)))) +
+  labs(title = "ACF for three Orders of Differencing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(diff(diff(diff(df$W398RC1A027NBEA)))) +
+  labs(title = "PACF for three Orders of Differencing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(ts_plot, acf_plot, pacf_plot, ncol = 1)
+
+```
+
+
+
+
+
+```{r, warning=FALSE, echo = FALSE}
+# Load required libraries
+library(ggplot2)
+
+
+# First, perform the augmented Dickey-Fuller test
+adf_result <- adf.test(diff(df$W398RC1A027NBEA, differences = 3))
+
+# Print the ADF test result
+print(adf_result)
+```
+
+Now, as we can see, the p-value is now smaller than the significant level. The dataset is stationary.
+
+### Evaluate the values for p & q
+```{r, warning=FALSE, echo = FALSE}
+# Set the theme
+theme_demo <- theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# Plot the ACF and PACF of the differenced series with the demo theme
+par(mfrow=c(2,1)) # Set up a 2x1 grid for plotting
+diff_series = diff(df$W398RC1A027NBEA, differences = 3)
+# ACF Plot
+acf_plot <- acf(diff_series, plot = FALSE)
+print(acf_plot, main="ACF of Differenced Household Income Time Series")
+ggAcf(diff_series) + theme_demo
+
+# PACF Plot
+pacf_plot <- pacf(diff_series, plot = FALSE)
+print(pacf_plot, main="PACF of Differenced Household Income Time Series")
+ggPacf(diff_series) + theme_demo
+
+```
+
+From the PACF plot, it seems that after the 1st lag, the correlation values drop into insignificance. Thus, we might consider p = 1 for the AR component. From the ACF plot you provided, the correlation seems to cut off after the 1st lag as well. Hence, you might consider q = 2 for the MA component. And we use d = 3 since we utilized third orders of differencing.
+
+### Fit model
+
+After we determing our parameters, we can start fitting the models.
+```{r, echo = FALSE}
+library(forecast)
+diff = diff(df$W398RC1A027NBEA, differences = 3)
+model <- Arima(diff, order=c(1,3,2))
+summary(model)
+
+```
+
+From here, we get a summary about the aic and bic values.
+
+### Model diagnostics
+
+Model diagnostics are very important for us to determine the performance of the parameters we choose. By setting different parameters, we can have a more general view and understanding regarding the model.
+
+```{r,warning=FALSE, echo = FALSE}
+## empty list to store model fits
+set.seed((150))
+arma14 =arima.sim(list(order=c(1,3,1), ar=-.4, ma=c(-.3)), n=10000)
+arma14 %>% ggtsdisplay()
+ARMA_res <- list()
+
+## set counter
+cc <-1
+
+## loop over AR
+for(p in 0:3){
+  ## loop over MA
+  for(q in 0:4){
+    
+  ARMA_res[[cc]]<-arima(x=arma14,order = c(p,3,q))
+  cc<- cc+1
+  }
+}
+
+## get AIC values for model evaluation
+
+ARMA_AIC<-sapply(ARMA_res,function(x) x$aic)
+
+ARMA_res[[which(ARMA_AIC == min(ARMA_AIC))]]
+```
+
+
+
+```{r,warning=FALSE, echo = FALSE}
+d=3
+i=1
+temp= data.frame()
+ls=matrix(rep(NA,6*17),nrow=17) # roughly nrow = 3x4x2
+
+
+for (p in 3:5)# p=1,2,3 : 3
+{
+  for(q in 3:5)# q=1,2,3,4 :4
+  {
+    for(d in 1:3)# d=1,2 :2
+    {
+      
+      if(p-1+d+q-1<=8) #usual threshold
+      {
+        
+        model<- Arima(df$W398RC1A027NBEA,order=c(p-1,d,q-1),include.drift=TRUE) 
+        ls[i,]= c(p-1,d,q-1,model$aic,model$bic,model$aicc)
+        i=i+1
+        #print(i)
+        
+      }
+      
+    }
+  }
+}
+
+temp= as.data.frame(ls)
+names(temp)= c("p","d","q","AIC","BIC","AICc")
+
+#temp
+knitr::kable(temp)
+```
+
+From the table, we can see that p=2, q=2 is the best, which are different from my assumption. The reason is that although there are spike and great change at lag 1. For lag 2, it also have correpondsing spike and change. Therefore, the new parameter sets are reasonable.
+
+```{r, echo = FALSE}
+temp[which.min(temp$AIC),]
+```
+```{r, echo = FALSE}
+temp[which.min(temp$BIC),]
+```
+```{r, echo = FALSE}
+temp[which.min(temp$AICc),]
+```
+
+In addition, we can see that for all AIC, BIC, and AICc values, these parameter sets are all the best.
+
+### Model Compare
+
+Now, to be more specific, we compare the two different parameter sets: (2,3,2) and (1,3,2):
+
+```{r,warning=FALSE, echo = FALSE}
+######### compare 3 models
+set.seed(345)
+model_output <- capture.output(sarima(df$W398RC1A027NBEA, 2,3,2))
+```
+
+```{r, echo = FALSE}
+model_output2 <- capture.output(sarima(df$W398RC1A027NBEA, 1,3,2))
+```
+
+```{r,warning=FALSE, echo = FALSE}
+#################### fitted vs. actual plot  ##############
+fit1=Arima(df$W398RC1A027NBEA,order=c(1,3,2),include.drift = TRUE)
+fit2=Arima(df$W398RC1A027NBEA,order=c(2,3,2),include.drift = TRUE) #warning for the drift, no drift 
+# Set background color
+par(bg = "#E0E0E0")
+
+# Plotting the data and model fits with custom background and border colors
+plot(df$W398RC1A027NBEA, col="blue", main="Time Series with SARIMA Fits", 
+     ylab="Value", xlab="Time", 
+     panel.first = rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
+                        col = "#E0E0E0", border = "#E0E0E0"))
+
+lines(fitted(fit1), col="green")
+lines(fitted(fit2), col="red") 
+
+# Adding a legend
+legend("topleft", 
+       legend = c("The Time Series Of the Data", "fit1", "fit2"), 
+       col = c("blue", "green", "red"), 
+       lty=1, # Type of the line (1 is for "solid")
+       cex=0.8, # Font size of the legend text
+       box.col="#E0E0E0", bg="#E0E0E0") 
+
+```
+
+Here, we can see that the two fits are actuaclly simiarly within our expecations, but overall, the second fit is better as indicated from model diagoosis.
+
+
+### Forecasting for the dataset using the best parameters
+```{r, echo = FALSE}
+forecast(fit2,10) # Forecasting for the next 10 minutes
+```
+
+```{r, echo = FALSE}
+
+
+# Autoplot with custom colors
+plot_fit2 <- autoplot(forecast(fit2)) + 
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    legend.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    legend.key = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Display the plot
+print(plot_fit2)
+```
+
+From the above graph, we can note that the forecasted number follows a pattern with time period from (28 to 30). This performance is not what was expected and, hence, it is possible that the models are not able to capture the underlying patterns in the data. However, the model did capture the upward trending and certain seasonality. This can be due to a variety of reasons, such as insufficient data and the models not being complex enough. Therefore, further action such as benchmarking should be made to compare the models to see if the model performs well.
+
+### BENCHMARK
+
+Now for benchmarking, we compare the model with the base models such as meanf, naive model, and rwf model.
+
+```{r, echo = FALSE}
+library(forecast)
+diff = diff(df$W398RC1A027NBEA, differences = 3)
+model <- Arima(diff, order=c(1,3,2))
+
+```
+
+#### The meanf model with residual plot
+```{r, echo = FALSE}
+f1<-meanf(df$W398RC1A027NBEA, h=11) #mean
+
+checkresiduals(f1)
+```
+
+#### The Arima model
+```{r, echo = FALSE}
+df$W398RC1A027NBEA %>%
+  Arima(order=c(0,0,1), seasonal=c(0,1,1)) %>% 
+  residuals() %>% 
+  ggtsdisplay()
+```
+
+```{r, echo = FALSE}
+fit=Arima(df$W398RC1A027NBEA, order = c(0,1,1),seasonal = list(order=c(0,0,1), period=4) ) 
+summary(fit)
+```
+
+```{r, echo = FALSE}
+f1 <- meanf(df$W398RC1A027NBEA, h=10) 
+
+#checkresiduals(f1)
+
+f2 <- naive(df$W398RC1A027NBEA, h=10) 
+
+#checkresiduals(f2)
+
+f3 <- rwf(df$W398RC1A027NBEA,drift=TRUE, h=10) 
+```
+
+#### Accuracy of the fitted models
+```{r, echo = FALSE}
+pred=forecast(fit2,20)
+accuracy(pred)
+pred[['mean']]
+```
+
+#### Accuracy of the based models
+```{r, echo = FALSE}
+accuracy(f1)
+```
+
+```{r, echo = FALSE}
+accuracy(f2)
+```
+
+```{r, echo = FALSE}
+accuracy(f3)
+```
+
+Based on the results, it is clear that the fitted model has the lowest error. our fitted model is performing better than these simple benchmark methods.
+
+```{r, echo = FALSE}
+gdp.ts=ts(df$W398RC1A027NBEA)
+```
+
+```{r, echo = FALSE}
+autoplot(gdp.ts) +
+  autolayer(meanf(gdp.ts, h=11),
+            series="Mean", PI=FALSE) +
+  autolayer(naive(gdp.ts, h=11),
+            series="Naïve", PI=FALSE) +
+  autolayer(snaive(gdp.ts, h=11),
+            series="fit", PI=FALSE) +
+  autolayer(forecast(fit2, h=11),
+            series="Seasonal naïve", PI=FALSE) +
+  ggtitle("Forecasts for Household Income") +
+  xlab("Year") + ylab("Household Income") +
+  guides(colour=guide_legend(title="Forecast")) +
+  theme(
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    panel.background = element_rect(fill = "#E0E0E0"),
+    panel.border = element_rect(fill = NA, color = "#E0E0E0")
+  )
+```
+
+```{r, echo = FALSE}
+autoplot(gdp.ts) +
+  autolayer(meanf(gdp.ts, h=20),
+            series="Mean.tr", PI=FALSE) +
+  autolayer(naive(gdp.ts, h=20),
+            series="Naïve.tr", PI=FALSE) +
+  autolayer(rwf(gdp.ts, drift=TRUE, h=40),
+            series="Drift.tr", PI=FALSE) +
+  autolayer(forecast(fit2,20), 
+            series="fit",PI=FALSE) +
+  ggtitle("Household Income in US") +
+  xlab("Time") + ylab("Household Income") +
+  guides(colour=guide_legend(title="Forecast")) +
+  theme(
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    panel.background = element_rect(fill = "#E0E0E0"),
+    panel.border = element_rect(fill = NA, color = "#E0E0E0")
+  )
+```
+
+Based on the plot, we can see that Our fit is better than the benchmark methods by capturing more about the seaonal pattern and trending.
+
+## The Median House Sale Price Data Analysis
+Due to the differencing methods should be used when the dataset is not stationary. Here, as in EDA section, the House Sale Price data analysis provides results that this dataset is not stationary. To have a brief recap, I have provided the orginal dataset and the acf and pacf plots.
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df <- read.csv("../Dataset/project/MSPUS.csv")
+df$DATE <- as.Date(df$DATE)
+head(df)
+```
+
+```{r,warning=FALSE,echo=FALSE}
+library(ggplot2)
+
+
+ggplot(data = df, aes(x = DATE, y = MSPUS)) +
+  geom_line(color = "DarkViolet") +
+  labs(title = "Time Series Plot of Household Sale Price",
+       x = "Date", 
+       y = "The Household Sale Price") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+
+```
+
+
+
+
+
+
+### ACF & PACF
+```{r, echo=FALSE}
+library(forecast)
+
+# ACF Plot
+ggAcf(df$MSPUS) +
+  labs(title = "ACF of Household Sale Price Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# PACF Plot
+ggPacf(df$MSPUS) +
+  labs(title = "PACF of Household Sale Price Time Series") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+From here, we can see that the dataset has a correlation, which also means that it is not stationary. In order to prove this conclusion, we utilize the adf test to ensure the results are the same.
+
+
+### Validation with ADF Test
+```{r, echo=FALSE}
+library(tseries)
+adf.test(df$MSPUS)
+
+
+```
+
+Based on the result, we can see that the p-value is greater than the thershold value, this means that we fail to reject the Null hypothesis. The time series dataset is not stationary.
+
+Then, to explore more, we utilize detrended and log-transformation to see about the patterns
+
+
+### Detrended and Log-transformed
+```{r, echo=FALSE}
+detrended_data <- data.frame(Date = df$DATE[-1], Detrended = diff(df$MSPUS))
+
+# Enhanced Detrended Plot
+ggplot(data = detrended_data, aes(x = Date, y = Detrended)) +
+  geom_line(color = "blue") +
+  labs(title = "Detrended Household Sale Price Time Series",
+       x = "Date",
+       y = "Detrended Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+
+```{r,warning=FALSE, echo=FALSE}
+log_transformed_data <- data.frame(Date = df$DATE, LogTransformed = log(df$MSPUS))
+
+# Enhanced Log-transformed Plot with Custom Background
+ggplot(data = log_transformed_data, aes(x = Date, y = LogTransformed)) +
+  geom_line(color = "blue") +
+  labs(title = "Log-transformed Time Series of Household Sale Price",
+       x = "Date",
+       y = "Log-transformed Value") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+From here, we can see that after detrending and dfferencing, the household sale price remains fluctuations espectially during 2020 period, which could be the cause of the Covid-19. In addition, Log-transformed time series, in order to remove the hetroscadastisity, we can see that the trend remains. I think the reason is possibly because log-transformation can assuage issues related to non-constant variance, which means that the inherent trend within the data may persist.
+
+### Test it stationary again
+```{r, echo=FALSE}
+library(tseries)
+adf.test(log_transformed_data$LogTransformed)
+
+
+```
+
+After the detrending and transformating, we can see that it is still not statinary. Which means that further action still needs to be done. I utilize differencing methods.
+
+### Make it Stationary by using differencing
+
+
+```{r, echo = FALSE}
+
+t = ts(diff(df$MSPUS))
+# Create the time series plot with the desired background and borders
+ts_plot <- autoplot(t) +
+  labs(title = "Time Series Plot With first Orders of Differencing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Extract the ACF and PACF plots without the theme
+acf_plot <- ggAcf(diff(df$MSPUS)) +
+  labs(title = "ACF for first Orders of Differencing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(diff(df$MSPUS)) +
+  labs(title = "PACF for first Orders of Differencing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(ts_plot, acf_plot, pacf_plot, ncol = 1)
+
+```
+
+
+After the first order of differencing, we can see the changes regarding the plots as a whole.
+
+
+```{r, warning=FALSE, echo = FALSE}
+adf.test(diff(df$MSPUS, differences = 1))
+
+
+```
+
+We can see that, after differencing, the dataset becomes stationary. Now, we can fit into the model with different parameters.
+
+```{r, warning=FALSE, echo = FALSE}
+# Load required libraries
+
+# First, perform the augmented Dickey-Fuller test
+adf_result <- adf.test(diff(df$MSPUS, differences = 1))
+
+
+
+# Set the theme
+theme_demo <- theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+# Plot the ACF and PACF of the differenced series with the demo theme
+par(mfrow=c(2,1)) # Set up a 2x1 grid for plotting
+diff_series = diff(df$MSPUS, differences = 3)
+# ACF Plot
+acf_plot <- acf(diff_series, plot = FALSE)
+print(acf_plot, main="ACF of Differenced Household Sale Price Time Series")
+ggAcf(diff_series) + theme_demo
+
+# PACF Plot
+pacf_plot <- pacf(diff_series, plot = FALSE)
+print(pacf_plot, main="PACF of Differenced Household Sale Price Time Series")
+ggPacf(diff_series) + theme_demo
+
+```
+
+From the PACF plot, it seems that after the 1st lag, the correlation values drop into insignificance. Thus, we might consider p = 1 for the AR component. From the ACF plot you provided, the correlation seems to cut off after the 1st lag as well. Hence, you might consider q = 1 for the MA component. And we use d = 1 since we utilized third orders of differencing.
+
+### Fit model
+```{r, echo = FALSE}
+library(forecast)
+diff = diff(df$MSPUS, differences = 1)
+model <- Arima(diff, order=c(1,1,1))
+summary(model)
+
+```
+
+### Model diagnostics
+
+```{r,warning=FALSE, echo = FALSE}
+## empty list to store model fits
+set.seed((150))
+arma14 =arima.sim(list(order=c(1,1,1), ar=-.1, ma=c(-.1)), n=10000)
+arma14 %>% ggtsdisplay()
+ARMA_res <- list()
+
+## set counter
+cc <-1
+
+## loop over AR
+for(p in 0:3){
+  ## loop over MA
+  for(q in 0:4){
+    
+  ARMA_res[[cc]]<-arima(x=arma14,order = c(p,1,q))
+  cc<- cc+1
+  }
+}
+
+## get AIC values for model evaluation
+
+ARMA_AIC<-sapply(ARMA_res,function(x) x$aic)
+
+ARMA_res[[which(ARMA_AIC == min(ARMA_AIC))]]
+```
+
+```{r,warning=FALSE, echo = FALSE}
+d=1
+i=1
+temp= data.frame()
+ls=matrix(rep(NA,6*18),nrow=18) # roughly nrow = 3x4x2
+
+
+for (p in 2:3)# p=1,2,3 : 3
+{
+  for(q in 2:4)# q=1,2,3,4 :4
+  {
+    for(d in 1:3)# d=1,2 :2
+    {
+      
+      if(p-1+d+q-1<=8) #usual threshold
+      {
+        
+        model<- Arima(df$MSPUS,order=c(p-1,d,q-1),include.drift=TRUE) 
+        ls[i,]= c(p-1,d,q-1,model$aic,model$bic,model$aicc)
+        i=i+1
+        #print(i)
+        
+      }
+      
+    }
+  }
+}
+
+temp= as.data.frame(ls)
+names(temp)= c("p","d","q","AIC","BIC","AICc")
+
+#temp
+knitr::kable(temp)
+```
+
+
+From the table, we can see that p=2, q=2 is the best, which are different from my assumption. The reason is that although there are spike and great change at lag 1. For lag 2, it also have correpondsing spike and change. In addition, since we used first order differencing, the value for d is not the same. By using higher d, the dataset can be more stationary for the model but has the potential of over differencing. Therefore, the new parameter sets are reasonable as well as the initial assumption.
+
+```{r, echo = FALSE}
+temp[which.min(temp$AIC),]
+```
+```{r, echo = FALSE}
+temp[which.min(temp$BIC),]
+```
+```{r, echo = FALSE}
+temp[which.min(temp$AICc),]
+```
+
+Since we only used 1 differencing, we can see that for all AIC, BIC, and AICc values, these parameter sets are all the best.
+
+### Model Compare
+
+Now, to be more specific, we compare the two different parameter sets: (2,2,3) and (1,1,1):
+```{r,warning=FALSE, echo = FALSE}
+######### compare 3 models
+set.seed(345)
+model_output <- capture.output(sarima(df$MSPUS, 2,2,3))
+```
+
+```{r, echo = FALSE}
+model_output2 <- capture.output(sarima(df$MSPUS, 1,1,1))
+```
+
+```{r,warning=FALSE, echo = FALSE}
+#################### fitted vs. actual plot  ##############
+fit1=Arima(df$MSPUS,order=c(2,2,3),include.drift = TRUE)
+fit2=Arima(df$MSPUS,order=c(1,1,1),include.drift = TRUE) #warning for the drift, no drift 
+# Set background color
+par(bg = "#E0E0E0")
+
+# Plotting the data and model fits with custom background and border colors
+plot(df$MSPUS, col="blue", main="Time Series with SARIMA Fits", 
+     ylab="Value", xlab="Time", 
+     panel.first = rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
+                        col = "#E0E0E0", border = "#E0E0E0"))
+
+lines(fitted(fit1), col="black")
+lines(fitted(fit2), col="red") 
+
+# Adding a legend
+legend("topleft", 
+       legend = c("The Time Series Of the Data", "fit1", "fit2"), 
+       col = c("blue", "black", "red"), 
+       lty=1, # Type of the line (1 is for "solid")
+       cex=0.8, # Font size of the legend text
+       box.col="#E0E0E0", bg="#E0E0E0") 
+
+```
+
+Here, we can see that the two fits are actuaclly simiarly within our expecations. The difference is that we used first order differencing but the model used second order.
+
+### Forecasting for the dataset 
+```{r, echo = FALSE}
+forecast(fit2,50) # Forecasting for the next 10 minutes
+```
+
+```{r, echo = FALSE}
+
+
+# Autoplot with custom colors
+plot_fit2 <- autoplot(forecast(fit2)) + 
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    legend.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    legend.key = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Display the plot
+print(plot_fit2)
+```
+
+From the above graph, we can note that the forecasting captures the trending very well. This performance is within expectation. Now, we can determine whether the fit is actually better than the base models through benchmarking.
+
+### BENCHMARK
+
+Now for benchmarking, we compare the model with the base models such as meanf, naive model, and rwf model.
+
+```{r, echo = FALSE}
+library(forecast)
+diff = diff(df$MSPUS, differences = 1)
+model <- Arima(diff, order=c(2,2,3))
+
+```
+
+#### The meanf model with residual plot
+
+```{r, echo = FALSE}
+f1<-meanf(df$MSPUS, h=11) #mean
+
+checkresiduals(f1)
+```
+
+#### The Arima model
+
+```{r, echo = FALSE}
+df$MSPUS %>%
+  Arima(order=c(0,0,1), seasonal=c(0,1,1)) %>% 
+  residuals() %>% 
+  ggtsdisplay()
+```
+
+```{r, echo = FALSE}
+fit=Arima(df$MSPUS, order = c(0,1,1),seasonal = list(order=c(0,0,1), period=4) ) 
+summary(fit)
+```
+
+```{r, echo = FALSE}
+f1 <- meanf(df$MSPUS, h=10) 
+
+#checkresiduals(f1)
+
+f2 <- naive(df$MSPUS, h=10) 
+
+#checkresiduals(f2)
+
+f3 <- rwf(df$MSPUS,drift=TRUE, h=10) 
+```
+
+#### Accuracy of the fitted models
+```{r, echo = FALSE}
+pred=forecast(fit2,20)
+accuracy(pred)
+pred[['mean']]
+```
+
+#### Accuracy of the based models
+
+```{r, echo = FALSE}
+accuracy(f1)
+```
+
+```{r, echo = FALSE}
+accuracy(f2)
+```
+
+```{r, echo = FALSE}
+accuracy(f3)
+```
+
+Based on the results, it is clear that the fitted model has the lowest error. our fitted model is performing better than these simple benchmark methods.
+
+
+```{r, echo = FALSE}
+gdp.ts=ts(df$MSPUS)
+```
+
+```{r, echo = FALSE}
+autoplot(gdp.ts) +
+  autolayer(meanf(gdp.ts, h=11),
+            series="Mean", PI=FALSE) +
+  autolayer(naive(gdp.ts, h=11),
+            series="Naïve", PI=FALSE) +
+  autolayer(snaive(gdp.ts, h=11),
+            series="fit", PI=FALSE) +
+  autolayer(forecast(fit2, h=11),
+            series="Seasonal naïve", PI=FALSE) +
+  ggtitle("Forecasts for Household Sale Price") +
+  xlab("Year") + ylab("Household Sale Price") +
+  guides(colour=guide_legend(title="Forecast")) +
+  theme(
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    panel.background = element_rect(fill = "#E0E0E0"),
+    panel.border = element_rect(fill = NA, color = "#E0E0E0")
+  )
+```
+
+```{r, echo = FALSE}
+autoplot(gdp.ts) +
+  autolayer(meanf(gdp.ts, h=20),
+            series="Mean.tr", PI=FALSE) +
+  autolayer(naive(gdp.ts, h=20),
+            series="Naïve.tr", PI=FALSE) +
+  autolayer(rwf(gdp.ts, drift=TRUE, h=40),
+            series="Drift.tr", PI=FALSE) +
+  autolayer(forecast(fit2,20), 
+            series="fit",PI=FALSE) +
+  ggtitle("Household Sale Price in US)") +
+  xlab("Time") + ylab("Household Sale Price") +
+  guides(colour=guide_legend(title="Forecast")) +
+  theme(
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    panel.background = element_rect(fill = "#E0E0E0"),
+    panel.border = element_rect(fill = NA, color = "#E0E0E0")
+  )
+```
+
+Based on the plot, we can see that Our fit is better than the benchmark methods by capturing more about the  trending pattern.
+
+
+
+
+
+# References and Codes
+- Codes: [Rmd, Python & Qmd](https://github.com/zy236yuz5/ANLY5600-TimeSeries)
+- U.S. Bureau of Economic Analysis, Household saving [W398RC1A027NBEA], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/W398RC1A027NBEA, September 19, 2023.
+- U.S. Census Bureau, Real Median Household Income in the United States [MEHOINUSA672N], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/MEHOINUSA672N, September 19, 2023.
+- U.S. Bureau of Economic Analysis, Gross Domestic Product: Implicit Price Deflator [A191RI1Q225SBEA], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/A191RI1Q225SBEA, September 18, 2023.
+- Zillow Group. Accessed April 19, 2023. “Zillow Research Data.” https://www.zillow.com/research/data/.
