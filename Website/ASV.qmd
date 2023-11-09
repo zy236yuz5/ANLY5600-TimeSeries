@@ -21,7 +21,1818 @@ format:
   html:
     theme: sandstone
     css: ./styles/layout.css
+    code-fold: true
     toc: true
 ---
 
-work in progress
+Discription:
+
+
+# Literatue Review to choose variables and models
+
+
+
+
+
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(reticulate)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(xts)
+library(vars)
+library(tseries)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(forecast)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+library(gridExtra)
+library(plotly)
+library(TTR) # For the SMA function
+
+```
+
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df1 <- read.csv("../Dataset/project/household_saving.csv")
+df2 <- read.csv("../Dataset/project/MEHOINUSA672N.csv")
+df3 <- read.csv("../Dataset/project/MSPUS.csv")
+df4 <- read.csv("../Dataset/project/SIPOVGINIUSA.csv")
+df5 <- read.csv("../Dataset/project/FIXHAI.csv")
+df6 <- read.csv("../Dataset/project/PSAVERT.csv")
+df7 <- read.csv("../Dataset/project/A191RI1Q225SBEA.csv")
+df8 <- read.csv("../Dataset/project/Merged_downsample.csv")
+
+df1$DATE <- as.Date(df1$DATE)
+df2$DATE <- as.Date(df2$DATE)
+df3$DATE <- as.Date(df3$DATE)
+df4$DATE <- as.Date(df4$DATE)
+df5$DATE <- as.Date(df5$DATE)
+df6$DATE <- as.Date(df6$DATE)
+df7$DATE <- as.Date(df7$DATE)
+df8$date <- as.Date(df8$date)
+head(df8)
+```
+
+
+```{r}
+saving =ts(df1$W398RC1A027NBEA)
+income =ts(df2$MEHOINUSA672N)
+gini =ts(df4$SIPOVGINIUSA)
+afford =ts(df5$FIXHAI)
+saverate =ts(df6$PSAVERT)
+gdp =ts(df7$A191RI1Q225SBEA)
+
+saleprice =ts(df8$Mean.Sale.Price)
+homevalue =ts(df8$Mean.Home.Value)
+rentalprice =ts(df8$mean)
+```
+
+# 1. (ARIMAX) Home value ~ Sale price + Rental price
+
+## Set Up The Variables
+```{r}
+dd1<-data.frame(homevalue,saleprice,rentalprice,df8$date)
+
+colnames(dd1)<-c("homevalue","saleprice","rentalprice",'date')
+
+knitr::kable(head(dd1))
+```
+
+```{r,warning=FALSE}
+lg.dd1 <- data.frame("date" =dd1$date,"homevalue"=log(dd1$homevalue),"saleprice"=log(dd1$saleprice),
+                                        "rentalprice"=log(dd1$rentalprice))
+
+#### converting to time series component #########
+lg.dd.ts1<-ts(lg.dd1,frequency = 4)
+
+##### Facet Plot #######################
+autoplot(lg.dd.ts1[,c(2:4)], facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("The Household Prices in USA")
+```
+
+
+## Auto Fit The Model
+
+```{r}
+xreg1 <- cbind(saleprice = lg.dd.ts1[, "saleprice"],
+              rentalprice = lg.dd.ts1[, "rentalprice"])
+
+fit1 <- auto.arima(lg.dd.ts1[, "homevalue"], xreg = xreg1)
+summary(fit1)
+```
+
+
+## Manual Fit The Model
+```{r}
+fit.reg1 <- lm( homevalue ~ saleprice+ rentalprice, data=lg.dd.ts1)
+summary(fit.reg1)
+```
+
+
+We can see that the variables are pretty significant.
+
+
+## Check The Residuals
+```{r}
+checkresiduals(fit1)
+```
+
+
+Based on the output, there's no indication that seasonal terms are being used and the datasets did not have too much seasonal pattern. Therefore, this is an ARIMAX model.
+
+## Check ACF and PACF
+```{r}
+########### Converting to Time Series component #######
+
+res.fit1<-ts(residuals(fit.reg1),frequency = 4)
+
+############## Then look at the residuals ############
+ggAcf(res.fit1)
+
+```
+
+```{r}
+ggPacf(res.fit1)
+```
+
+Since there is no major seasonal pattern. We use differencing directly
+
+## Differencing ACF and PACF
+```{r}
+
+# Extract the ACF and PACF plots without the theme
+acf_plot <- ggAcf(diff(res.fit1, differences = 1)) +
+  labs(title = "ACF for first Order of Differencing and Seasonal Differenceing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(diff(res.fit1, differences = 1)) +
+  labs(title = "PACF for first Orders of Differencing and Seasonal Differenceing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(acf_plot, pacf_plot, ncol = 1)             
+
+```
+
+Now, it is mostly stationary for us to continue
+From ACF and PACF, it seems that we can consider: p = 1,2,3 q = 1,2,3. We use first order of differencing so d = 1.
+There is no major seasonal pattern, therefore, no P,Q,D in this case.
+
+## Model Diagnotistics
+Finding the model parameters.
+```{r,warning=FALSE}
+d=1
+i=1
+temp= data.frame()
+ls=matrix(rep(NA,6*23),nrow=23) # roughly nrow = 3x4x2
+
+
+for (p in 3:5)# p=1,2,3 : 3
+{
+  for(q in 3:5)# q=1,2,3,4 :4
+  {
+    for(d in 1:3)# d=1,2 :2
+    {
+      
+      if(p-1+d+q-1<=8) #usual threshold
+      {
+        
+        model<- Arima(res.fit1,order=c(p-1,d,q-1),include.drift=TRUE) 
+        ls[i,]= c(p-1,d,q-1,model$aic,model$bic,model$aicc)
+        i=i+1
+        #print(i)
+        
+      }
+      
+    }
+  }
+}
+
+temp= as.data.frame(ls)
+names(temp)= c("p","d","q","AIC","BIC","AICc")
+
+#temp
+knitr::kable(temp)
+
+
+```
+
+```{r}
+temp[which.min(temp$AIC),]
+```
+
+```{r}
+temp[which.min(temp$BIC),]
+```
+
+```{r}
+temp[which.min(temp$AICc),]
+```
+
+From here, we have two potential ones: (2,1,2) and (2,1,4)
+
+## Compare The models
+
+```{r}
+set.seed(236)
+
+model_output11 <- capture.output(sarima(res.fit1, 2,1,4)) 
+model_output12 <- capture.output(sarima(res.fit1, 2,1,2)) 
+```
+```{r}
+cat(model_output11[90:123], model_output11[length(model_output11)], sep = "\n")
+cat(model_output12[40:70], model_output12[length(model_output12)], sep = "\n")
+```
+
+Based on this, I think the second one (2,1,4) is slightly better with less correlation and smaller AIC value.
+
+
+## Cross validation
+```{r}
+n=length(res.fit1)
+n *0.3 
+```
+
+```{r}
+k=324
+ 
+rmse1 <- matrix(NA, 53,4)
+rmse2 <- matrix(NA,53,4)
+rmse3 <- matrix(NA,53,4)
+
+st <- tsp(res.fit1)[1]+(k-1)/4 
+
+for(i in 1:53)
+{
+  xtrain <- window(res.fit1, end=st + i-1)
+  xtest <- window(res.fit1, start=st + (i-1) + 1/4, end=st + i)
+  
+
+  
+  fit <- Arima(xtrain, order=c(2,1,4),
+                include.drift=TRUE, method="ML")
+  fcast <- forecast(fit, h=4)
+  
+  fit2 <- Arima(xtrain, order=c(2,1,2),
+                include.drift=TRUE, method="ML")
+  fcast2 <- forecast(fit2, h=4)
+  
+  
+
+  rmse1[i,1:length(xtest)]  <- sqrt((fcast$mean-xtest)^2)
+  rmse2[i,1:length(xtest)] <- sqrt((fcast2$mean-xtest)^2)
+
+  
+}
+
+plot(1:4, colMeans(rmse1,na.rm=TRUE), type="l", col=2, xlab="horizon", ylab="RMSE")
+lines(1:4, colMeans(rmse2,na.rm=TRUE), type="l",col=3)
+
+legend("topleft",legend=c("fit1","fit2"),col=2:3,lty=1)
+```
+
+```{r}
+colMeans( rmse1,na.rm=TRUE)
+colMeans( rmse2,na.rm=TRUE)
+```
+Based on the cross validation, we can see that the conclusion aligns, the fit1 which is (2,1,4) performs better with smaller errors.
+
+
+## Fit the model 
+
+```{r}
+xreg1 <- cbind(saleprice = lg.dd.ts1[, "saleprice"],
+              rentalprice = lg.dd.ts1[, "rentalprice"])
+
+
+fit1 <- Arima(lg.dd.ts1[, "homevalue"],order=c(2,1,4),xreg=xreg1)
+summary(fit1)
+```
+
+
+## Write Down The equation:
+Given that `y_t` represents the log-transformed `homevalue` at time `t`, the ARIMA(2,1,4) can be:
+
+(1 - φ₁B - φ₂B²)(1 - B)yₜ = α + β₁ * salepriceₜ + β₂ * rentalpriceₜ + (1 + θ₁B + θ₂B² + θ₃B³ + θ₄B⁴)εₜ
+
+
+Based on the summary, my equation is
+
+(1 - 0.8151B - 0.0766B²)(1 - B)yₜ = α + 0.8651 * salepriceₜ + 0.1058 * rentalpriceₜ + (1 - 1.2454B + 0.1814B² - 0.1233B³ + 0.1903B⁴)εₜ
+
+## Forecasting
+```{r}
+spfit<-auto.arima(lg.dd.ts1[, "saleprice"]) 
+summary(spfit) 
+```
+
+```{r}
+fsp<-forecast(spfit,80) #obtaining forecasts
+
+rpfit<-auto.arima(lg.dd.ts1[, "rentalprice"]) #fitting an ARIMA model to the Import variable
+summary(rpfit)
+```
+
+```{r}
+frp<-forecast(rpfit,80)
+
+fxreg <- cbind(saleprice = fsp$mean, 
+              rentalprice = frp$mean) #fimp$mean gives the forecasted values
+
+
+
+fcast <- forecast(fit1, xreg=fxreg,80) 
+autoplot(fcast, main="Forecast of Home Values") + xlab("Year") +
+  ylab("Home")
+```
+
+
+
+
+
+# 2. (ARIMAX) Saving Rate ~ Household Income + Household Saving
+
+## Creating Ts Objects For Variables
+```{r}
+# Define start and end dates
+start_date <- as.Date("1992-01-01")
+end_date <- as.Date("2020-12-31")
+
+# Subset data frames to include only data from 1992 through 2020
+df1_sub <- subset(df1, DATE >= start_date & DATE <= end_date)
+df2_sub <- subset(df2, DATE >= start_date & DATE <= end_date)
+df6_sub <- subset(df6, DATE >= start_date & DATE <= end_date)
+
+# Assuming the data is annual for this example. If it's quarterly, you'd use frequency = 4; if monthly, frequency = 12.
+frequency <- 1
+
+# Create ts objects
+saving <- ts(df1_sub$W398RC1A027NBEA, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+income <- ts(df2_sub$MEHOINUSA672N, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+rate <- ts(df6_sub$PSAVERT, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+
+```
+
+
+saving rate, income, saveing can be interesting to be evaluated
+
+
+
+## Combine the Varaibles
+```{r}
+dd2<-data.frame(rate,saving,income,df1_sub$DATE)
+
+colnames(dd2)<-c("saving_rate","household_saving","household_income",'date')
+
+knitr::kable(head(dd2))
+```
+
+## Make a Log transformation For Seasonal Pattern
+```{r,warning=FALSE}
+lg.dd2 <- data.frame("date" =dd2$date,"saving_rate"=log(dd2$saving_rate),"household_saving"=log(dd2$household_saving),
+                                        "household_income"=log(dd2$household_income))
+
+#### converting to time series component #########
+lg.dd.ts2<-ts(lg.dd2,frequency = 4)
+
+##### Facet Plot #######################
+autoplot(lg.dd.ts2[,c(2:4)], facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("The Household Prices in USA")
+```
+
+
+## Auto Fit The Model
+
+```{r}
+xreg2 <- cbind(household_income = lg.dd.ts2[, "household_income"],
+              household_saving = lg.dd.ts2[, "household_saving"])
+
+fit2 <- auto.arima(lg.dd.ts2[, "saving_rate"], xreg = xreg2)
+summary(fit2)
+```
+
+
+## Manual Fit The model
+```{r}
+fit.reg2 <- lm( saving_rate ~  household_saving + household_income, data=lg.dd.ts2)
+summary(fit.reg2)
+```
+
+It seems that the household income did not play any important role. Therefore, We can consider to remove it.
+
+## Manual Fit Again Without Insignificant Variable
+```{r}
+fit.reg2 <- lm( saving_rate ~  household_saving, data=lg.dd.ts2)
+summary(fit.reg2)
+```
+
+We can see that the variables are pretty significant.
+
+## Check residuals
+```{r}
+checkresiduals(fit2)
+```
+
+Based on the output, there's no indication that seasonal terms are being used and the datasets did not have too much seasonal pattern. Therefore, this is an ARIMAX model.
+
+## ACF and PACF Check
+```{r}
+########### Converting to Time Series component #######
+
+res.fit2<-ts(residuals(fit.reg2),frequency = 2)
+
+############## Then look at the residuals ############
+ggAcf(res.fit2)
+
+```
+
+```{r}
+ggPacf(res.fit2)
+```
+
+Since there is no major seasonal pattern. And it seems that the data is already stationary
+
+## No Need For Seasonal Differencing
+```{r}
+
+# Extract the ACF and PACF plots without the theme
+acf_plot <- ggAcf(res.fit2) +
+  labs(title = "ACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(res.fit2) +
+  labs(title = "PACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(acf_plot, pacf_plot, ncol = 1)             
+
+```
+
+Now, it is mostly stationary for us to continue
+From ACF and PACF, it seems that we can consider: p = 1,2 q = 1,2. We use first order of differencing so d = 0.
+There is no major seasonal pattern, therefore, no P,Q,D in this case.
+
+## Model Diagnotistics
+Finding the model parameters.
+```{r,warning=FALSE}
+d=1
+i=1
+temp= data.frame()
+ls=matrix(rep(NA,6*23),nrow=23) # roughly nrow = 3x4x2
+
+
+for (p in 3:5)# p=1,2,3 : 3
+{
+  for(q in 3:5)# q=1,2,3,4 :4
+  {
+    for(d in 1:3)# d=1,2 :2
+    {
+      
+      if(p-1+d+q-1<=8) #usual threshold
+      {
+        
+        model<- Arima(res.fit2,order=c(p-1,d,q-1),include.drift=TRUE) 
+        ls[i,]= c(p-1,d,q-1,model$aic,model$bic,model$aicc)
+        i=i+1
+        #print(i)
+        
+      }
+      
+    }
+  }
+}
+
+temp= as.data.frame(ls)
+names(temp)= c("p","d","q","AIC","BIC","AICc")
+
+#temp
+knitr::kable(temp)
+
+
+```
+
+```{r}
+temp[which.min(temp$AIC),]
+```
+
+```{r}
+temp[which.min(temp$BIC),]
+```
+
+```{r}
+temp[which.min(temp$AICc),]
+```
+
+From here, we have two potential ones: (2,1,2) and (0,0,0) from part 1
+
+## Compare The Models
+
+```{r}
+set.seed(236)
+
+model_output21 <- capture.output(sarima(res.fit2, 2,1,2)) 
+model_output22 <- capture.output(sarima(res.fit2, 0,0,0)) 
+```
+```{r}
+cat(model_output21[145:160], model_output21[length(model_output21)], sep = "\n")
+```
+
+```{r}
+
+cat(model_output22[20:38], model_output22[length(model_output22)], sep = "\n")
+```
+
+Based on this, I think the first one (2,1,2) is slightly better with less correlation and closer to the significant level.
+
+
+## Cross validation
+```{r}
+n=length(res.fit2)
+n *0.3 
+```
+
+```{r,warning=FALSE}
+k=9
+ 
+rmse1 <- matrix(NA, 40,2)
+rmse2 <- matrix(NA,40,2)
+rmse3 <- matrix(NA,40,2)
+
+st <- tsp(res.fit1)[1]+(k-1)/4 
+
+for(i in 1:12)
+{
+  xtrain <- window(res.fit2, end=st + i-1)
+  xtest <- window(res.fit2, start=st + (i-1) + 1/4, end=st + i)
+  
+
+  
+  fit <- Arima(xtrain, order=c(2,1,2),
+                include.drift=TRUE, method="ML")
+  fcast <- forecast(fit, h=4)
+  
+  fit2 <- Arima(xtrain, order=c(0,0,0),
+                include.drift=TRUE, method="ML")
+  fcast2 <- forecast(fit2, h=4)
+  
+  
+
+  rmse1[i,1:length(xtest)]  <- sqrt((fcast$mean-xtest)^2)
+  rmse2[i,1:length(xtest)] <- sqrt((fcast2$mean-xtest)^2)
+
+  
+}
+
+plot(1:2, colMeans(rmse1,na.rm=TRUE), type="l", col=2, xlab="horizon", ylab="RMSE")
+lines(1:2, colMeans(rmse2,na.rm=TRUE), type="l",col=3)
+
+legend("topleft",legend=c("fit1","fit2"),col=2:3,lty=1)
+```
+Here, although
+
+```{r}
+colMeans( rmse1,na.rm=TRUE)
+colMeans( rmse2,na.rm=TRUE)
+```
+Based on the cross validation, overall, the two method is simiarly within expectation. We can see that although model (0,0,0) has smaller errors after, the dataset is relatively biased due to the size of the date overlapping. We should still use the fit1 which is (2,1,2) to perform later analysis.
+
+
+## Fit the model With The Best One
+
+```{r}
+xreg2 <- cbind(household_income = lg.dd.ts2[, "household_income"],
+              household_saving = lg.dd.ts2[, "household_saving"])
+
+
+fit2 <- Arima(lg.dd.ts2[, "saving_rate"],order=c(2,1,2),xreg=xreg2)
+summary(fit2)
+```
+
+## Write Doen The equation:
+Given that `y_t` represents the log-transformed `homevalue` at time `t`, the ARIMA(2,1,4) can be:
+
+(1 - φ₁B - φ₂B²)(1 - B)yₜ = α + β₁ * salepriceₜ + β₂ * rentalpriceₜ + (1 + θ₁B + θ₂B² + θ₃B³ + θ₄B⁴)εₜ
+
+
+Based on the summary, my equation for this model is
+
+(1 - 0.4885B - (-0.4602)B^2)(1 - B)y_t = \alpha + 0.1188 \cdot \text{household_income}_t - 0.1330 \cdot \text{household_saving}_t + (1 - 1.2187B + 0.5136B^2)\varepsilon_t
+
+
+## Forecasting
+```{r}
+hsfit<-auto.arima(lg.dd.ts2[, "household_saving"]) 
+summary(hsfit) 
+```
+
+```{r}
+fhs<-forecast(hsfit,12) #obtaining forecasts
+
+hifit<-auto.arima(lg.dd.ts2[, "household_income"]) #fitting an ARIMA model to the Import variable
+summary(rpfit)
+```
+
+```{r}
+fhi<-forecast(hifit,12)
+
+fxreg <- cbind(household_income = fhi$mean,household_saving = fhs$mean
+              ) #fimp$mean gives the forecasted values
+
+fcast <- forecast(fit2, xreg=fxreg,12) 
+autoplot(fcast, main="Forecast of Saving Rate") + xlab("Year") +
+  ylab("Saving Rate")
+```
+
+
+
+
+
+# 3. (VAR) Sale Price & Saving Rate & Gdp Deflator
+
+## Transform all to time series
+```{r}
+saving =ts(df1$W398RC1A027NBEA)
+income =ts(df2$MEHOINUSA672N)
+sale = ts(df3$MSPUS)
+gini =ts(df4$SIPOVGINIUSA)
+afford =ts(df5$FIXHAI)
+saverate =ts(df6$PSAVERT)
+gdp =ts(df7$A191RI1Q225SBEA)
+
+saleprice =ts(df8$Mean.Sale.Price)
+homevalue =ts(df8$Mean.Home.Value)
+rentalprice =ts(df8$mean)
+```
+
+
+## Prepare Variables: saving rate, sale price, gdp deflator
+```{r}
+# Define start and end dates
+start_date <- as.Date("1965-01-01")
+end_date <- as.Date("2020-12-31")
+
+# Subset data frames to include only data from 1992 through 2020
+df3_sub <- subset(df3, DATE >= start_date & DATE <= end_date)
+df6_sub <- subset(df6, DATE >= start_date & DATE <= end_date)
+df7_sub <- subset(df7, DATE >= start_date & DATE <= end_date)
+
+# Assuming the data is annual for this example. If it's quarterly, you'd use frequency = 4; if monthly, frequency = 12.
+frequency <- 5
+
+# Create ts objects
+sale_price <- ts(df3_sub$MSPUS, start = c(1965, 1), end = c(2020, 1), frequency = frequency)
+saving_rate <- ts(df6_sub$PSAVERT, start = c(1965, 1), end = c(2020, 1), frequency = frequency)
+gdp <- ts(df7_sub$A191RI1Q225SBEA, start = c(1965, 1), end = c(2020, 1), frequency = frequency)
+DATE <- ts(df7_sub$DATE, start = c(1965, 1), end = c(2020, 1), frequency = frequency)
+```
+
+
+
+## Combine Variables
+```{r}
+dd3<-data.frame(sale_price,saving_rate,gdp,DATE)
+
+colnames(dd3)<-c("sale_price","saving_rate","gdp_deflator",'date')
+
+knitr::kable(head(dd3))
+```
+
+## Plot the Variables Together
+```{r,warning=FALSE}
+lg.dd3 <- data.frame("date" =dd3$date,"sale_price"=log(dd3$sale_price),"saving_rate"=log(dd3$saving_rate),
+                                        "gdp_deflator"=log(dd3$gdp_deflator))
+
+#### converting to time series component #########
+lg.dd.ts3<-ts(lg.dd3,frequency = 5)
+
+##### Facet Plot #######################
+autoplot(lg.dd.ts3[,c(2:4)], facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("The GDP Deflator, Sale Price, Saving Rate in USA")
+```
+
+
+
+## Finding out the best p:
+```{r}
+VARselect(dd3[, c(2:4)], lag.max=10, type="both")
+```
+
+From the results, we can see that 3,4 have relatively smaller criterias:
+We can fit several models with p=1, 3, and 4.=> VAR(1), VAR(3), VAR(4)
+
+## Fitting a VAR model with different p:
+```{r}
+summary(vars::VAR(dd3[, c(2:4)], p=1, type='both'))
+```
+```{r}
+summary(vars::VAR(dd3[, c(2:4)], p=3, type='both'))
+```
+
+```{r}
+summary(vars::VAR(dd3[, c(2:4)], p=4, type='both'))
+```
+
+We can see that some models have some variables significant but not all. We will keep the variables and make comparison in the next steps to get the better one.
+
+
+## Cross Validations
+
+### Define length
+
+
+```{r}
+n=length(dd3$gdp_deflator)
+k=85 #19*4
+
+n*0.3
+```
+
+
+```{r}
+dat = ts(dd3[,c(1,2,3)])
+```
+
+### Cross Validation For gdp deflator
+```{r}
+
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- dat[,c(3)][1:(k-1)+i] 
+  xtest <- dat[,c(3)][k+i] 
+  
+  fit <- vars::VAR(dat, p=3, type='both')
+  fcast1 <- forecast(fit, h=4)
+  fcast1 = predict(fit, n.ahead = 12, ci = 0.95)
+ 
+  
+  fit2 <- vars::VAR(dat, p=4, type='both')
+  fcast2 <- forecast(fit2, h=4)
+  fcast2 = predict(fit2, n.ahead = 12, ci = 0.95)
+  
+  #capture error for each iteration
+  # This is RMSE
+  err1 = c(err1, sqrt((fcast1$fcst$gdp_deflator-xtest)^2))
+  err2 = c(err2, sqrt((fcast2$fcst$gdp_deflator-xtest)^2))
+
+}
+
+
+```
+
+#### Normalize the RMSE For Ploting
+
+```{r}
+# Normalize function
+normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalize e1 and e2
+normalized_e1 <- normalize(err1)
+normalized_e2 <- normalize(err2)
+
+e <- 0.03
+
+# Set the background color of the plot region to #E0E0E0
+par(bg = "#E0E0E0")
+
+# Plot the normalized e1 with a red line
+plot(normalized_e1+ e, type="l", col="red", ylim=range(c(normalized_e1, normalized_e2 + e)), xlab="Index", ylab="Normalized Values", main="Normalized RMSE Plot of e1 and e2 For GDP Deflator")
+
+# Add the normalized e2 with an offset and a blue line
+lines(normalized_e2 , type="l", col="blue")
+
+# Add a legend to distinguish the lines
+legend("topright", legend=c("e1", "e2"), col=c("red", "blue"), lty=1, cex=0.8)
+
+
+```
+
+#### Compare the errors
+
+```{r}
+error1 <- as.numeric(err1)
+error1 <- error1[!is.na(error1) & !is.nan(error1)]
+error1 <- mean(error1)
+
+error2 <- as.numeric(err2)
+error2 <- error2[!is.na(error2) & !is.nan(error2)]
+error2 <- mean(error2)
+
+
+error1
+error2
+
+```
+
+The first one is better but not too different for GDP Deflator
+
+### Cross Validation For Saving rate
+```{r}
+
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- dat[,c(2)][1:(k-1)+i] 
+  xtest <- dat[,c(2)][k+i] 
+  
+  fit <- vars::VAR(dat, p=3, type='both')
+  fcast1 <- forecast(fit, h=4)
+  fcast1 = predict(fit, n.ahead = 12, ci = 0.95)
+ 
+  
+  fit2 <- vars::VAR(dat, p=4, type='both')
+  fcast2 <- forecast(fit2, h=4)
+  fcast2 = predict(fit2, n.ahead = 12, ci = 0.95)
+  
+  #capture error for each iteration
+  # This is RMSE
+  err1 = c(err1, sqrt((fcast1$fcst$saving_rate-xtest)^2))
+  err2 = c(err2, sqrt((fcast2$fcst$saving_rate-xtest)^2))
+
+}
+
+
+
+```
+
+#### Normalize the errors for ploting
+
+```{r}
+# Normalize function
+normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalize e1 and e2
+normalized_e1 <- normalize(err1)
+normalized_e2 <- normalize(err2)
+
+e <- 0.03
+
+# Set the background color of the plot region to #E0E0E0
+par(bg = "#E0E0E0")
+
+# Plot the normalized e1 with a red line
+plot(normalized_e1, type="l", col="red", ylim=range(c(normalized_e1, normalized_e2 + e)), xlab="Index", ylab="Normalized Values", main="Normalized RMSE Plot of e1 and e2 For Saving Rate")
+
+# Add the normalized e2 with an offset and a blue line
+lines(normalized_e2 + e, type="l", col="blue")
+
+# Add a legend to distinguish the lines
+legend("topright", legend=c("e1", "e2"), col=c("red", "blue"), lty=1, cex=0.8)
+
+
+```
+
+#### Compare errors
+Let us reorganize the errors
+```{r}
+error1 <- as.numeric(err1)
+error1 <- error1[!is.na(error1) & !is.nan(error1)]
+error1 <- mean(error1)
+
+error2 <- as.numeric(err2)
+error2 <- error2[!is.na(error2) & !is.nan(error2)]
+error2 <- mean(error2)
+
+
+error1
+error2
+
+```
+
+The first one is also better for saving rate
+
+
+### Cross Validation For Sale price
+```{r}
+
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- dat[,c(1)][1:(k-1)+i] 
+  xtest <- dat[,c(1)][k+i] 
+  
+  fit <- vars::VAR(dat, p=3, type='both')
+  fcast1 <- forecast(fit, h=4)
+  fcast1 = predict(fit, n.ahead = 12, ci = 0.95)
+ 
+  
+  fit2 <- vars::VAR(dat, p=4, type='both')
+  fcast2 <- forecast(fit2, h=4)
+  fcast2 = predict(fit2, n.ahead = 12, ci = 0.95)
+  
+  #capture error for each iteration
+  # This is RMSE
+  err1 = c(err1, sqrt((fcast1$fcst$sale_price-xtest)^2))
+  err2 = c(err2, sqrt((fcast2$fcst$sale_price-xtest)^2))
+
+}
+
+
+
+```
+
+#### Normalize The Errors 
+```{r}
+# Normalize function
+normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalize e1 and e2
+normalized_e1 <- normalize(err1)
+normalized_e2 <- normalize(err2)
+
+e <- 0.03
+
+# Set the background color of the plot region to #E0E0E0
+par(bg = "#E0E0E0")
+
+# Plot the normalized e1 with a red line
+plot(normalized_e1, type="l", col="red", ylim=range(c(normalized_e1, normalized_e2 + e)), xlab="Index", ylab="Normalized Values", main="Normalized RMSE Plot of e1 and e2 For Sale Price")
+
+# Add the normalized e2 with an offset and a blue line
+lines(normalized_e2 + e, type="l", col="blue")
+
+# Add a legend to distinguish the lines
+legend("topright", legend=c("e1", "e2"), col=c("red", "blue"), lty=1, cex=0.8)
+
+
+```
+
+#### Compare The Errors
+
+```{r}
+error1 <- as.numeric(err1)
+error1 <- error1[!is.na(error1) & !is.nan(error1)]
+error1 <- mean(error1)
+
+error2 <- as.numeric(err2)
+error2 <- error2[!is.na(error2) & !is.nan(error2)]
+error2 <- mean(error2)
+
+
+error1
+error2
+
+```
+
+Overall, we can see that in my case, all variables have smaller RMSE with VAR(3)
+
+## Forecasting
+
+Forecast using the best one which is VAR(3)
+
+```{r}
+fit1 <- vars::VAR(dat[,1:3], p=3, type="const")
+fcast1 = predict(fit1, n.ahead = 8, ci = 0.95)
+fcast1$fcst$gdp_deflator
+```
+
+### Check Corresponind Forecasting
+```{r}
+fcast1$fcst$sale_price
+```
+
+
+```{r}
+fcast1$fcst$saving_rate
+```
+
+
+## Forecast Results
+```{r}
+forecast(fit1,48) %>%
+  autoplot() + xlab("Year")
+```
+
+
+
+# 4. (ARIMAX) GINI Index ~ Household Income + Household Saving + Sale Price
+
+## Prepare the Variables
+```{r}
+# Define start and end dates
+start_date <- as.Date("1992-01-01")
+end_date <- as.Date("2020-12-31")
+
+# Subset data frames to include only data
+df1_sub <- subset(df1, DATE >= start_date & DATE <= end_date)
+df4_sub <- subset(df4, DATE >= start_date & DATE <= end_date)
+df2_sub <- subset(df2, DATE >= start_date & DATE <= end_date)
+df3_sub <- subset(df3, DATE >= start_date & DATE <= end_date)
+
+# Assuming the data is annual for this example. If it's quarterly, you'd use frequency = 4; if monthly, frequency = 12.
+frequency <- 1
+
+# Create ts objects
+saving <- ts(df1_sub$W398RC1A027NBEA, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+income <- ts(df2_sub$MEHOINUSA672N, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+sale <- ts(df3_sub$MSPUS, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+gini <- ts(df4_sub$SIPOVGINIUSA, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+
+```
+
+
+## Combine the Variables
+```{r}
+dd1<-data.frame(gini,saving,income,sale,df1_sub$DATE)
+
+colnames(dd1)<-c("gini","saving","income",'sale','date')
+dd1$gini <- ts(as.numeric(dd1$gini))
+knitr::kable(head(dd1))
+```
+
+
+```{r,warning=FALSE}
+lg.dd1 <- data.frame("date" =dd1$date,"gini"=log(dd1$gini),"saving"=log(dd1$saving),
+                                        "income"=log(dd1$income),"sale"=log(dd1$sale))
+
+#### converting to time series component #########
+lg.dd.ts1<-ts(lg.dd1,frequency = 4)
+
+##### Facet Plot #######################
+autoplot(lg.dd.ts1[,c(2:5)], facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("The Household Prices in USA")
+```
+
+
+## Auto Fit the Model
+
+```{r}
+xreg1 <- cbind(saving = lg.dd.ts1[, "saving"],
+              income = lg.dd.ts1[, "income"],
+              sale = lg.dd.ts1[, "sale"])
+
+fit1 <- auto.arima(lg.dd.ts1[, "gini"], xreg = xreg1)
+summary(fit1)
+```
+
+
+## Manual Fit The Model
+```{r}
+fit.reg1 <- lm( gini ~ saving+ income + sale, data=lg.dd.ts1)
+summary(fit.reg1)
+```
+
+We can see that the sale and saving are pretty significant. For income, it seems that it does not provide too much impact.
+We can consider to remove it
+
+## Manual Fit Again
+```{r}
+fit.reg1 <- lm( gini ~ saving+ sale, data=lg.dd.ts1)
+summary(fit.reg1)
+```
+
+## Check Residuals
+```{r}
+checkresiduals(fit1)
+```
+Based on the output, there's no indication that seasonal terms are being used and the datasets did not have too much seasonal pattern. Therefore, this is an ARIMAX model.
+
+## Check ACF and PACF
+
+```{r}
+########### Converting to Time Series component #######
+
+res.fit1<-ts(residuals(fit.reg1),frequency = 4)
+
+############## Then look at the residuals ############
+ggAcf(res.fit1)
+
+```
+
+```{r}
+ggPacf(res.fit1)
+```
+
+Since there is no major seasonal pattern. And the dataset is stationary, We can actually use it as it is
+
+## NO Need To Differencing
+```{r}
+
+# Extract the ACF and PACF plots without the theme
+acf_plot <- ggAcf(res.fit1) +
+  labs(title = "ACF ") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(res.fit1) +
+  labs(title = "PACF ") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(acf_plot, pacf_plot, ncol = 1)             
+
+```
+Now, it is  stationary for us to continue
+
+From ACF and PACF, although there are not too many spikes and seasonal patterns, it seems that we can still consider: p = 1,2 q = 1,2. We use d = 0.
+There is no major seasonal pattern, therefore, no P,Q,D in this case.
+
+## Model Diagnotistics
+Finding the model parameters.
+```{r,warning=FALSE}
+d=0
+i=1
+temp= data.frame()
+ls=matrix(rep(NA,6*70),nrow=70) 
+
+
+for (p in 1:5)# p=1,2,3 : 3
+{
+  for(q in 1:5)# q=1,2,3,4 :4
+  {
+    for(d in 1:3)# d=1,2 :2
+    {
+      
+      if(p-1+d+q-1<=8) #usual threshold
+      {
+        
+        model<- Arima(res.fit1,order=c(p-1,d-1,q-1),include.drift=TRUE) 
+        ls[i,]= c(p-1,d-1,q-1,model$aic,model$bic,model$aicc)
+        i=i+1
+        #print(i)
+        
+      }
+      
+    }
+  }
+}
+
+temp= as.data.frame(ls)
+names(temp)= c("p","d","q","AIC","BIC","AICc")
+
+#temp
+knitr::kable(temp)
+
+
+```
+
+```{r}
+temp[which.min(temp$AIC),]
+```
+
+```{r}
+temp[which.min(temp$BIC),]
+```
+
+```{r}
+temp[which.min(temp$AICc),]
+```
+
+From here, we can see that (4,0,2) and (0,0,2) is better. Therefore, we will compare them
+
+## Compare with the two models
+
+```{r}
+set.seed(236)
+
+model_output11 <- capture.output(sarima(res.fit1, 4,0,2)) 
+model_output12 <- capture.output(sarima(res.fit1, 0,0,2)) 
+```
+```{r}
+cat(model_output11[150:173], model_output11[length(model_output11)], sep = "\n")
+cat(model_output12[40:67], model_output12[length(model_output12)], sep = "\n")
+```
+
+Based on this, I think the second one (0,0,2) is slightly better with less correlation and smaller AIC value.
+
+
+## Cross validation
+```{r}
+n=length(res.fit1)
+n *0.3 
+dat = ts(dd1[,c(1,2,4)])
+
+```
+
+
+```{r}
+# The number of folds for cross-validation
+n_folds <- 5
+horizon <- 4  # Forecasting horizon
+window_size <- length(dat[, 3]) - (n_folds * horizon)
+
+# Initialize an empty list to store forecasts
+forecasts <- list()
+forecasts2 <- list()
+
+# Initialize vectors to store error metrics for each model
+rmse1 <- numeric(n_folds)
+rmse2 <- numeric(n_folds)
+
+for (i in 1:n_folds) {
+  # Define the training set for this fold
+  train_set <- window(dat[, 3], end = c(window_size + ((i - 1) * horizon)))
+
+  # Fit the ARIMA models on the training set
+  fit <- Arima(train_set, order = c(4, 0, 2), include.drift = TRUE, method = "ML")
+  fit2 <- Arima(train_set, order = c(0, 0, 2), include.drift = TRUE, method = "ML")
+
+  # Forecast on the horizon
+  fcast <- forecast(fit, h = horizon)
+  fcast2 <- forecast(fit2, h = horizon)
+
+  # Store forecasts
+  forecasts[[i]] <- fcast
+  forecasts2[[i]] <- fcast2
+
+  # Define the test set for this fold
+  test_set <- window(dat[, 3], start = window_size + ((i - 1) * horizon) + 1, end = window_size + (i * horizon))
+
+  # Calculate and store the RMSE for each model
+  rmse1[i] <- sqrt(mean((fcast$mean - test_set)^2, na.rm = TRUE))
+  rmse2[i] <- sqrt(mean((fcast2$mean - test_set)^2, na.rm = TRUE))
+}
+
+# Calculate the average RMSE for each model
+mean_rmse1 <- mean(rmse1)
+mean_rmse2 <- mean(rmse2)
+
+
+
+# Plot RMSE values for both models
+plot(rmse1, type = "b", col = "blue", ylim = range(c(rmse1, rmse2)), 
+     xlab = "Fold", ylab = "RMSE", pch = 19, 
+     main = "Cross-Validation RMSE for ARIMA Models")
+lines(rmse2, type = "b", col = "red", pch = 18)
+points(rmse2, type = "b", col = "red", pch = 18)
+
+# Add a legend to the plot
+legend("topright", legend = c("Model 1 (ARIMA(4,0,2))", "Model 2 (ARIMA(0,0,2))"), 
+       col = c("blue", "red"), pch = c(19, 18), lty = 1)
+```
+
+```{r}
+# Output 
+mean_rmse1
+mean_rmse2
+```
+
+Based on the cross validation, we can see that the conclusion aligns, the fit1 which is (0,0,2) performs better with smaller errors.
+
+
+## Fit the model
+
+```{r}
+xreg1 <- cbind(saving = lg.dd.ts1[, "saving"],
+              sale = lg.dd.ts1[, "sale"])
+
+
+fit1 <- Arima(lg.dd.ts1[, "gini"],order=c(0,0,2),xreg=xreg1)
+summary(fit1)
+```
+
+The equation:
+Given that `y_t` represents the log-transformed `homevalue` at time `t`, the ARIMA(0,0,2) can be:
+
+\( y_t = c + \theta_1 e_{t-1} + \theta_2 e_{t-2} + \beta_1 \text{saving}_t + \beta_2 \text{sale}_t + e_t \)
+
+Based on the summary, my equation is
+
+\( y_t = 0.5375 - 0.4973 e_{t-1} - 0.5027 e_{t-2} - 0.0204 \times \text{saving}_t + 0.2789 \times \text{sale}_t + e_t \)
+
+
+## Forecast
+```{r}
+sfit<-auto.arima(lg.dd.ts1[, "sale"]) 
+summary(sfit) 
+```
+
+```{r}
+fs<-forecast(sfit,80) #obtaining forecasts
+
+s2fit<-auto.arima(lg.dd.ts1[, "saving"]) #fitting an ARIMA model to the Import variable
+summary(s2fit)
+```
+
+```{r,warning=FALSE}
+fs2<-forecast(s2fit,80)
+
+fxreg <- cbind(
+              sale = fs2$mean,saving = fs$mean) #fimp$mean gives the forecasted values
+
+
+
+fcast <- forecast(fit1, xreg=fxreg,80) 
+autoplot(fcast, main="Forecast of Home Values") + xlab("Year") +
+  ylab("Home")
+```
+
+
+
+# 5. (VAR) Home Value ~ Saving Rate + Gdp Deflator + Sale Price
+
+
+## Time Series Transformation
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+
+df9 <- read.csv("../Dataset/project/USAUCSFRCONDOSMSAMID.csv")
+
+df9$DATE <- as.Date(df9$DATE)
+
+
+
+# Transform all to time series
+
+saving =ts(df1$W398RC1A027NBEA)
+income =ts(df2$MEHOINUSA672N)
+sale = ts(df3$MSPUS)
+gini =ts(df4$SIPOVGINIUSA)
+afford =ts(df5$FIXHAI)
+saverate =ts(df6$PSAVERT)
+gdp =ts(df7$A191RI1Q225SBEA)
+
+
+homevalue =ts(df9$USAUCSFRCONDOSMSAMID)
+
+```
+
+
+## Select the Variables with common Dates
+Home Value ~ Saving Rate + Gdp Deflator + Sale Price
+```{r}
+# Define start and end dates
+start_date <- as.Date("2000-01-01")
+end_date <- as.Date("2020-12-31")
+
+# Subset data frames to include only data from 1992 through 2020
+df3_sub <- subset(df3, DATE >= start_date & DATE <= end_date)
+df6_sub <- subset(df6, DATE >= start_date & DATE <= end_date)
+df7_sub <- subset(df7, DATE >= start_date & DATE <= end_date)
+df9_sub <- subset(df9, DATE >= start_date & DATE <= end_date)
+
+# Assuming the data is annual for this example. If it's quarterly, you'd use frequency = 4; if monthly, frequency = 12.
+frequency <- 4
+
+# Create ts objects
+sale <- ts(df3_sub$MSPUS, start = c(2000, 1), end = c(2020, 1), frequency = frequency)
+saving <- ts(df6_sub$PSAVERT, start = c(2000, 1), end = c(2020, 1), frequency = frequency)
+gdp <- ts(df7_sub$A191RI1Q225SBEA, start = c(2000, 1), end = c(2020, 1), frequency = frequency)
+homevalue <- ts(df9_sub$USAUCSFRCONDOSMSAMID, start = c(2000, 1), end = c(2020, 1), frequency = frequency)
+DATE <- ts(df7_sub$DATE, start = c(2000, 1), end = c(2020, 1), frequency = frequency)
+```
+
+
+
+## Combine the Variables
+```{r}
+dd3<-data.frame(homevalue,saving,gdp,sale,DATE)
+
+colnames(dd3)<-c("homevalue","saving","gdp_deflator", "sale",'date')
+
+knitr::kable(head(dd3))
+```
+
+## Plot the Figure Together
+
+```{r,warning=FALSE}
+lg.dd3 <- data.frame("date" =dd3$date,"sale"=log(dd3$sale),"saving"=log(dd3$saving),"homevalue"=log(dd3$homevalue),
+                                        "gdp_deflator"=log(dd3$gdp))
+
+#### converting to time series component #########
+lg.dd.ts3<-ts(lg.dd3,frequency = 4)
+
+##### Facet Plot #######################
+autoplot(lg.dd.ts3[,c(2:5)], facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("The GDP Deflator, Sale Price, Saving Rate, Home value in USA")
+```
+
+## Fitting a VAR model
+Finding out the best p:
+```{r}
+VARselect(dd3[, c(2:5)], lag.max=14, type="both")
+```
+From the results, we can see that 13,14 have relatively smaller criterias:
+
+We can fit several models with p=13, 14.=>  VAR(13), VAR(14)
+```{r}
+summary(vars::VAR(dd3[, c(2:5)], p=13, type='both'))
+```
+```{r}
+summary(vars::VAR(dd3[, c(2:5)], p=14, type='both'))
+```
+
+
+We can see that some models have some variables significant but not all. We will keep the variables and make comparison in the next steps to get the better one.
+
+
+## Cross Validations
+
+```{r}
+n=length(dd3$gdp_deflator)
+n*0.3
+```
+```{r}
+k=25 #19*4
+n-k
+```
+
+```{r}
+dd3
+```
+
+
+
+
+
+
+
+
+```{r}
+dat = ts(dd3[,c(1,2,3,4)])
+```
+
+### Cross Validation For Home Value
+```{r}
+
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- dat[,c(1)][1:(k-1)+i] 
+  xtest <- dat[,c(1)][k+i] 
+  
+  fit <- vars::VAR(dat, p=13, type='both')
+  fcast1 <- forecast(fit, h=4)
+  fcast1 = predict(fit, n.ahead = 12, ci = 0.95)
+ 
+  
+  fit2 <- vars::VAR(dat, p=14, type='both')
+  fcast2 <- forecast(fit2, h=4)
+  fcast2 = predict(fit2, n.ahead = 12, ci = 0.95)
+  
+  #capture error for each iteration
+  # This is RMSE
+  err1 = c(err1, sqrt((fcast1$fcst$gdp_deflator-xtest)^2))
+  err2 = c(err2, sqrt((fcast2$fcst$gdp_deflator-xtest)^2))
+
+}
+
+
+```
+
+
+#### RMSE Plot
+
+```{r}
+# Normalize function
+normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalize e1 and e2
+normalized_e1 <- normalize(err1)
+normalized_e2 <- normalize(err2)
+
+
+
+# Set the background color of the plot region to #E0E0E0
+par(bg = "#E0E0E0")
+
+# Plot the normalized e1 with a red line
+plot(normalized_e1+ e, type="l", col="red", ylim=range(c(normalized_e1, normalized_e2 + e)), xlab="Index", ylab="Normalized Values", main="Normalized RMSE Plot of e1 and e2 For Home Value")
+
+# Add the normalized e2 with an offset and a blue line
+lines(normalized_e2 , type="l", col="blue")
+
+# Add a legend to distinguish the lines
+legend("topright", legend=c("e1", "e2"), col=c("red", "blue"), lty=1, cex=0.8)
+
+
+```
+
+#### RSME Comparesions
+```{r}
+error1 <- as.numeric(err1)
+error1 <- error1[!is.na(error1) & !is.nan(error1)]
+error1 <- mean(error1)
+
+error2 <- as.numeric(err2)
+error2 <- error2[!is.na(error2) & !is.nan(error2)]
+error2 <- mean(error2)
+
+
+error1
+error2
+
+```
+
+### Cross Validation For Saving Rate
+
+```{r}
+
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- dat[,c(2)][1:(k-1)+i] 
+  xtest <- dat[,c(2)][k+i] 
+  
+  fit <- vars::VAR(dat, p=13, type='both')
+  fcast1 <- forecast(fit, h=4)
+  fcast1 = predict(fit, n.ahead = 12, ci = 0.95)
+ 
+  
+  fit2 <- vars::VAR(dat, p=14, type='both')
+  fcast2 <- forecast(fit2, h=4)
+  fcast2 = predict(fit2, n.ahead = 12, ci = 0.95)
+  
+  #capture error for each iteration
+  # This is RMSE
+  err1 = c(err1, sqrt((fcast1$fcst$gdp_deflator-xtest)^2))
+  err2 = c(err2, sqrt((fcast2$fcst$gdp_deflator-xtest)^2))
+
+}
+
+
+```
+
+
+#### RMSE PLOT
+
+```{r}
+# Normalize function
+normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalize e1 and e2
+normalized_e1 <- normalize(err1)
+normalized_e2 <- normalize(err2)
+
+
+
+# Set the background color of the plot region to #E0E0E0
+par(bg = "#E0E0E0")
+
+# Plot the normalized e1 with a red line
+plot(normalized_e1+ e, type="l", col="red", ylim=range(c(normalized_e1, normalized_e2 + e)), xlab="Index", ylab="Normalized Values", main="Normalized RMSE Plot of e1 and e2 For Saving Rate")
+
+# Add the normalized e2 with an offset and a blue line
+lines(normalized_e2 , type="l", col="blue")
+
+# Add a legend to distinguish the lines
+legend("topright", legend=c("e1", "e2"), col=c("red", "blue"), lty=1, cex=0.8)
+
+
+```
+
+#### RMSE Compares
+
+```{r}
+error1 <- as.numeric(err1)
+error1 <- error1[!is.na(error1) & !is.nan(error1)]
+error1 <- mean(error1)
+
+error2 <- as.numeric(err2)
+error2 <- error2[!is.na(error2) & !is.nan(error2)]
+error2 <- mean(error2)
+
+
+error1
+error2
+
+```
+
+
+### Cross Validation For GDP Deflator
+```{r}
+
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- dat[,c(3)][1:(k-1)+i] 
+  xtest <- dat[,c(3)][k+i] 
+  
+  fit <- vars::VAR(dat, p=13, type='both')
+  fcast1 <- forecast(fit, h=4)
+  fcast1 = predict(fit, n.ahead = 12, ci = 0.95)
+ 
+  
+  fit2 <- vars::VAR(dat, p=14, type='both')
+  fcast2 <- forecast(fit2, h=4)
+  fcast2 = predict(fit2, n.ahead = 12, ci = 0.95)
+  
+  #capture error for each iteration
+  # This is RMSE
+  err1 = c(err1, sqrt((fcast1$fcst$gdp_deflator-xtest)^2))
+  err2 = c(err2, sqrt((fcast2$fcst$gdp_deflator-xtest)^2))
+
+}
+
+
+```
+
+
+#### RMSE Plots
+```{r}
+# Normalize function
+normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalize e1 and e2
+normalized_e1 <- normalize(err1)
+normalized_e2 <- normalize(err2)
+
+
+
+# Set the background color of the plot region to #E0E0E0
+par(bg = "#E0E0E0")
+
+# Plot the normalized e1 with a red line
+plot(normalized_e1+ e, type="l", col="red", ylim=range(c(normalized_e1, normalized_e2 + e)), xlab="Index", ylab="Normalized Values", main="Normalized RMSE Plot of e1 and e2 For GDP Deflator")
+
+# Add the normalized e2 with an offset and a blue line
+lines(normalized_e2 , type="l", col="blue")
+
+# Add a legend to distinguish the lines
+legend("topright", legend=c("e1", "e2"), col=c("red", "blue"), lty=1, cex=0.8)
+
+
+```
+
+#### RMSE Compares
+```{r}
+error1 <- as.numeric(err1)
+error1 <- error1[!is.na(error1) & !is.nan(error1)]
+error1 <- mean(error1)
+
+error2 <- as.numeric(err2)
+error2 <- error2[!is.na(error2) & !is.nan(error2)]
+error2 <- mean(error2)
+
+
+error1
+error2
+
+```
+
+### Cross Validation For Sale Price
+
+```{r}
+
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- dat[,c(4)][1:(k-1)+i] 
+  xtest <- dat[,c(4)][k+i] 
+  
+  fit <- vars::VAR(dat, p=13, type='both')
+  fcast1 <- forecast(fit, h=4)
+  fcast1 = predict(fit, n.ahead = 12, ci = 0.95)
+ 
+  
+  fit2 <- vars::VAR(dat, p=14, type='both')
+  fcast2 <- forecast(fit2, h=4)
+  fcast2 = predict(fit2, n.ahead = 12, ci = 0.95)
+  
+  #capture error for each iteration
+  # This is RMSE
+  err1 = c(err1, sqrt((fcast1$fcst$gdp_deflator-xtest)^2))
+  err2 = c(err2, sqrt((fcast2$fcst$gdp_deflator-xtest)^2))
+
+}
+
+
+```
+
+
+#### RMSE Plots
+
+```{r}
+# Normalize function
+normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalize e1 and e2
+normalized_e1 <- normalize(err1)
+normalized_e2 <- normalize(err2)
+
+
+
+# Set the background color of the plot region to #E0E0E0
+par(bg = "#E0E0E0")
+
+# Plot the normalized e1 with a red line
+plot(normalized_e1+ e, type="l", col="red", ylim=range(c(normalized_e1, normalized_e2 + e)), xlab="Index", ylab="Normalized Values", main="Normalized RMSE Plot of e1 and e2 For Sale Price")
+
+# Add the normalized e2 with an offset and a blue line
+lines(normalized_e2 , type="l", col="blue")
+
+# Add a legend to distinguish the lines
+legend("topright", legend=c("e1", "e2"), col=c("red", "blue"), lty=1, cex=0.8)
+
+
+```
+
+#### RMSE Values Compares
+```{r}
+error1 <- as.numeric(err1)
+error1 <- error1[!is.na(error1) & !is.nan(error1)]
+error1 <- mean(error1)
+
+error2 <- as.numeric(err2)
+error2 <- error2[!is.na(error2) & !is.nan(error2)]
+error2 <- mean(error2)
+
+
+error1
+error2
+
+```
+
+
+
+The second one VAR(14) is better for Home Value and Sale Price, However, overall, not too different
+The first one VAR(13) is better for GDP Deflator and Saving Rate
+Therefore, VAR(13) is relatively better than VAR(14)
+
+
+
+
+
+## Forecasts
+```{r}
+
+fit1 <- vars::VAR(dat[,1:4], p=13, type="const")
+fcast1 = predict(fit1, n.ahead = 8, ci = 0.95)
+fcast1$fcst$gdp_deflator
+```
+
+```{r}
+fcast1$fcst$sale
+```
+
+
+```{r}
+fcast1$fcst$saving
+```
+
+```{r}
+fcast1$fcst$homevalue
+```
+
+```{r}
+fcast1$fcst$sale
+```
+
+```{r}
+forecast(fit1,48) %>%
+  autoplot() + xlab("Year")
+```

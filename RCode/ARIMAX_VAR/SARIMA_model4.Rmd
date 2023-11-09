@@ -1,0 +1,404 @@
+---
+title: "datavis"
+author: "Zonghong Yu"
+date: "2023-09-18"
+output: html_document
+---
+
+```{r}
+library(reticulate)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(gridExtra)
+library(caret)
+library(xts)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+library(plotly)
+library(TTR) # For the SMA function
+
+```
+
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df1 <- read.csv("../../Dataset/project/household_saving.csv")
+df2 <- read.csv("../../Dataset/project/MEHOINUSA672N.csv")
+df3 <- read.csv("../../Dataset/project/MSPUS.csv")
+df4 <- read.csv("../../Dataset/project/SIPOVGINIUSA.csv")
+df5 <- read.csv("../../Dataset/project/FIXHAI.csv")
+df6 <- read.csv("../../Dataset/project/PSAVERT.csv")
+df7 <- read.csv("../../Dataset/project/A191RI1Q225SBEA.csv")
+df8 <- read.csv("../../Dataset/project/Merged_downsample.csv")
+
+df1$DATE <- as.Date(df1$DATE)
+df2$DATE <- as.Date(df2$DATE)
+df3$DATE <- as.Date(df3$DATE)
+df4$DATE <- as.Date(df4$DATE)
+df5$DATE <- as.Date(df5$DATE)
+df6$DATE <- as.Date(df6$DATE)
+df7$DATE <- as.Date(df7$DATE)
+df8$date <- as.Date(df8$date)
+head(df8)
+```
+# Transform all to time series
+```{r}
+saving =ts(df1$W398RC1A027NBEA)
+income =ts(df2$MEHOINUSA672N)
+sale =ts(df3$MSPUS)
+gini =ts(df4$SIPOVGINIUSA)
+afford =ts(df5$FIXHAI)
+saverate =ts(df6$PSAVERT)
+gdp =ts(df7$A191RI1Q225SBEA)
+
+saleprice =ts(df8$Mean.Sale.Price)
+homevalue =ts(df8$Mean.Home.Value)
+rentalprice =ts(df8$mean)
+```
+
+```{r}
+length(saving)
+length(income)
+length(sale)
+length(gini)
+length(afford)
+length(saverate)
+length(gdp)
+length(saleprice)
+length(homevalue)
+length(rentalprice)
+
+```
+
+```{r}
+# Define start and end dates
+start_date <- as.Date("1992-01-01")
+end_date <- as.Date("2020-12-31")
+
+# Subset data frames to include only data
+df1_sub <- subset(df1, DATE >= start_date & DATE <= end_date)
+df4_sub <- subset(df4, DATE >= start_date & DATE <= end_date)
+df2_sub <- subset(df2, DATE >= start_date & DATE <= end_date)
+df3_sub <- subset(df3, DATE >= start_date & DATE <= end_date)
+
+# Assuming the data is annual for this example. If it's quarterly, you'd use frequency = 4; if monthly, frequency = 12.
+frequency <- 1
+
+# Create ts objects
+saving <- ts(df1_sub$W398RC1A027NBEA, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+income <- ts(df2_sub$MEHOINUSA672N, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+sale <- ts(df3_sub$MSPUS, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+gini <- ts(df4_sub$SIPOVGINIUSA, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+
+```
+
+# Literatue Review to choose variables
+
+
+GINI Index ~ Household Income + Household Saving + Sale Price
+
+
+## Model 1
+```{r}
+dd1<-data.frame(gini,saving,income,sale,df1_sub$DATE)
+
+colnames(dd1)<-c("gini","saving","income",'sale','date')
+dd1$gini <- ts(as.numeric(dd1$gini))
+knitr::kable(head(dd1))
+```
+
+
+```{r,warning=FALSE}
+lg.dd1 <- data.frame("date" =dd1$date,"gini"=log(dd1$gini),"saving"=log(dd1$saving),
+                                        "income"=log(dd1$income),"sale"=log(dd1$sale))
+
+#### converting to time series component #########
+lg.dd.ts1<-ts(lg.dd1,frequency = 4)
+
+##### Facet Plot #######################
+autoplot(lg.dd.ts1[,c(2:5)], facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("The Household Prices in USA")
+```
+
+
+Auto Fit
+
+```{r}
+xreg1 <- cbind(saving = lg.dd.ts1[, "saving"],
+              income = lg.dd.ts1[, "income"],
+              sale = lg.dd.ts1[, "sale"])
+
+fit1 <- auto.arima(lg.dd.ts1[, "gini"], xreg = xreg1)
+summary(fit1)
+```
+
+
+Manual Fit
+```{r}
+fit.reg1 <- lm( gini ~ saving+ income + sale, data=lg.dd.ts1)
+summary(fit.reg1)
+```
+We can see that the sale and saving are pretty significant. For income, it seems that it does not provide too much impact.
+We can consider to remove it
+
+Manual Fit
+```{r}
+fit.reg1 <- lm( gini ~ saving+ sale, data=lg.dd.ts1)
+summary(fit.reg1)
+```
+
+```{r}
+checkresiduals(fit1)
+```
+Based on the output, there's no indication that seasonal terms are being used and the datasets did not have too much seasonal pattern. Therefore, this is an ARIMAX model.
+
+```{r}
+########### Converting to Time Series component #######
+
+res.fit1<-ts(residuals(fit.reg1),frequency = 4)
+
+############## Then look at the residuals ############
+ggAcf(res.fit1)
+
+```
+
+```{r}
+ggPacf(res.fit1)
+```
+
+Since there is no major seasonal pattern. And the dataset is stationary, We can actually use it as it is
+```{r}
+
+# Extract the ACF and PACF plots without the theme
+acf_plot <- ggAcf(res.fit1) +
+  labs(title = "ACF ") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(res.fit1) +
+  labs(title = "PACF ") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(acf_plot, pacf_plot, ncol = 1)             
+
+```
+Now, it is  stationary for us to continue
+
+From ACF and PACF, although there are not too many spikes and seasonal patterns, it seems that we can still consider: p = 1,2 q = 1,2. We use d = 0.
+There is no major seasonal pattern, therefore, no P,Q,D in this case.
+
+## Model Diagnotistics
+Finding the model parameters.
+```{r,warning=FALSE}
+d=0
+i=1
+temp= data.frame()
+ls=matrix(rep(NA,6*70),nrow=70) 
+
+
+for (p in 1:5)# p=1,2,3 : 3
+{
+  for(q in 1:5)# q=1,2,3,4 :4
+  {
+    for(d in 1:3)# d=1,2 :2
+    {
+      
+      if(p-1+d+q-1<=8) #usual threshold
+      {
+        
+        model<- Arima(res.fit1,order=c(p-1,d-1,q-1),include.drift=TRUE) 
+        ls[i,]= c(p-1,d-1,q-1,model$aic,model$bic,model$aicc)
+        i=i+1
+        #print(i)
+        
+      }
+      
+    }
+  }
+}
+
+temp= as.data.frame(ls)
+names(temp)= c("p","d","q","AIC","BIC","AICc")
+
+#temp
+knitr::kable(temp)
+
+
+```
+
+```{r}
+temp[which.min(temp$AIC),]
+```
+
+```{r}
+temp[which.min(temp$BIC),]
+```
+
+```{r}
+temp[which.min(temp$AICc),]
+```
+From here, we can see that (4,0,2) and (0,0,2) is better. Therefore, we will compare them
+Compare:
+
+```{r}
+set.seed(236)
+
+model_output11 <- capture.output(sarima(res.fit1, 4,0,2)) 
+model_output12 <- capture.output(sarima(res.fit1, 0,0,2)) 
+```
+```{r}
+cat(model_output11[150:173], model_output11[length(model_output11)], sep = "\n")
+cat(model_output12[40:67], model_output12[length(model_output12)], sep = "\n")
+```
+
+Based on this, I think the second one (0,0,2) is slightly better with less correlation and smaller AIC value.
+
+
+## cross validation
+```{r}
+n=length(res.fit1)
+n *0.3 
+dat = ts(dd1[,c(1,2,4)])
+
+```
+
+
+
+
+```{r}
+
+
+library(forecast)
+
+# Assuming 'dat' is your time series data and the 3rd column is the one of interest
+
+# The number of folds for cross-validation
+n_folds <- 5
+horizon <- 4  # Forecasting horizon
+window_size <- length(dat[, 3]) - (n_folds * horizon)
+
+# Initialize an empty list to store forecasts
+forecasts <- list()
+forecasts2 <- list()
+
+# Initialize vectors to store error metrics for each model
+rmse1 <- numeric(n_folds)
+rmse2 <- numeric(n_folds)
+
+for (i in 1:n_folds) {
+  # Define the training set for this fold
+  train_set <- window(dat[, 3], end = c(window_size + ((i - 1) * horizon)))
+
+  # Fit the ARIMA models on the training set
+  fit <- Arima(train_set, order = c(4, 0, 2), include.drift = TRUE, method = "ML")
+  fit2 <- Arima(train_set, order = c(0, 0, 2), include.drift = TRUE, method = "ML")
+
+  # Forecast on the horizon
+  fcast <- forecast(fit, h = horizon)
+  fcast2 <- forecast(fit2, h = horizon)
+
+  # Store forecasts
+  forecasts[[i]] <- fcast
+  forecasts2[[i]] <- fcast2
+
+  # Define the test set for this fold
+  test_set <- window(dat[, 3], start = window_size + ((i - 1) * horizon) + 1, end = window_size + (i * horizon))
+
+  # Calculate and store the RMSE for each model
+  rmse1[i] <- sqrt(mean((fcast$mean - test_set)^2, na.rm = TRUE))
+  rmse2[i] <- sqrt(mean((fcast2$mean - test_set)^2, na.rm = TRUE))
+}
+
+# Calculate the average RMSE for each model
+mean_rmse1 <- mean(rmse1)
+mean_rmse2 <- mean(rmse2)
+
+
+
+# Plot RMSE values for both models
+plot(rmse1, type = "b", col = "blue", ylim = range(c(rmse1, rmse2)), 
+     xlab = "Fold", ylab = "RMSE", pch = 19, 
+     main = "Cross-Validation RMSE for ARIMA Models")
+lines(rmse2, type = "b", col = "red", pch = 18)
+points(rmse2, type = "b", col = "red", pch = 18)
+
+# Add a legend to the plot
+legend("topright", legend = c("Model 1 (ARIMA(4,0,2))", "Model 2 (ARIMA(0,0,2))"), 
+       col = c("blue", "red"), pch = c(19, 18), lty = 1)
+```
+
+```{r}
+# Output 
+mean_rmse1
+mean_rmse2
+```
+
+
+
+
+Based on the cross validation, we can see that the conclusion aligns, the fit1 which is (0,0,2) performs better with smaller errors.
+
+
+## Fit the model
+
+
+
+```{r}
+xreg1 <- cbind(saving = lg.dd.ts1[, "saving"],
+              sale = lg.dd.ts1[, "sale"])
+
+
+fit1 <- Arima(lg.dd.ts1[, "gini"],order=c(0,0,2),xreg=xreg1)
+summary(fit1)
+```
+The equation:
+Given that `y_t` represents the log-transformed `gini` at time `t`, the ARIMA(0,0,2) can be:
+
+\( y_t = c + \theta_1 e_{t-1} + \theta_2 e_{t-2} + \beta_1 \text{saving}_t + \beta_2 \text{sale}_t + e_t \)
+
+Based on the summary, my equation is
+
+\( y_t = 0.5375 - 0.4973 e_{t-1} - 0.5027 e_{t-2} - 0.0204 \times \text{saving}_t + 0.2789 \times \text{sale}_t + e_t \)
+
+
+## Forecast
+```{r}
+sfit<-auto.arima(lg.dd.ts1[, "sale"]) 
+summary(sfit) 
+```
+
+```{r}
+fs<-forecast(sfit,80) #obtaining forecasts
+
+s2fit<-auto.arima(lg.dd.ts1[, "saving"]) #fitting an ARIMA model to the Import variable
+summary(s2fit)
+```
+
+```{r,warning=FALSE}
+fs2<-forecast(s2fit,80)
+
+fxreg <- cbind(
+              sale = fs2$mean,saving = fs$mean) #fimp$mean gives the forecasted values
+
+
+
+fcast <- forecast(fit1, xreg=fxreg,80) 
+autoplot(fcast, main="Forecast of Home Values") + xlab("Year") +
+  ylab("Home")
+```
+

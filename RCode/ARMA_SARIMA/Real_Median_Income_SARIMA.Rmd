@@ -1,0 +1,385 @@
+---
+title: "datavis"
+author: "Zonghong Yu"
+date: "2023-09-18"
+output: html_document
+---
+
+```{r}
+library(reticulate)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(gridExtra)
+
+library(xts)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+library(plotly)
+library(TTR) # For the SMA function
+
+```
+
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df <- read.csv("../../Dataset/project/MEHOINUSA672N.csv")
+df$DATE <- as.Date(df$DATE)
+head(df)
+```
+
+
+# SARIMA ANALYSIS
+# Before Covid
+```{r}
+df$MEHOINUSA672N
+```
+
+
+# Before Covid Period
+```{r}
+rmhi <- ts(df$MEHOINUSA672N,frequency = 2)
+rmhi
+```
+
+```{r}
+library(ggplot2)
+
+
+ggplot(data = df, aes(x = DATE, y = MEHOINUSA672N)) +
+  geom_line(color = "DarkViolet") +
+  labs(title = "Time Series Plot of Household Income",
+       x = "Date", 
+       y = "Household Income") +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "#E0E0E0"),
+        panel.grid.major = element_line(color = "grey", size = 0.1),
+        panel.grid.minor = element_line(color = "grey", size = 0.05),
+        plot.background = element_rect(fill = "#E0E0E0"))
+
+```
+
+# Check
+
+```{r}
+# Decompose the time series data
+dec <- decompose(rmhi, type = "multiplicative")  # Choose either "additive" or "multiplicative"
+
+# Set the graphical parameters for the plot
+par(bg = "#E0E0E0", col.axis = "#E0E0E0", col.lab = "black", col.main = "black", col.sub = "black")
+
+# Plot the decomposed object
+plot(dec)
+
+# Reset the graphical parameters to default
+par(bg = "white", col.axis = "black", col.lab = "black", col.main = "black", col.sub = "black")
+
+```
+```{r}
+gglagplot(rmhi, do.lines=FALSE, set.lags = c(2, 4, 8, 12))
+```
+# Seasonal Difference
+This shows seasonality. Also the lag plot shows higher correlation at Seasonal lag 2 relatively.
+```{r}
+ts_plot <- autoplot(rmhi) +
+  labs(title = "Time Series Plot ") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Extract the ACF and PACF plots without the theme
+acf_plot <- ggAcf(diff(diff(rmhi, lag=2), differences = 1)) +
+  labs(title = "ACF for first Order of Differencing and Seasonal Differenceing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(diff(diff(rmhi, lag=2), differences = 1)) +
+  labs(title = "PACF for first Orders of Differencing and Seasonal Differenceing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(ts_plot, acf_plot, pacf_plot, ncol = 1)             
+
+```
+
+
+Most spikes are within range, it is stationary. 
+ACF Plot (Autocorrelation Function Plot):
+
+The sharp drop after lag 2. This gives us q = 1,2.
+Since there's a noticeable autocorrelation at lag 2,5, this suggests a seasonal component. The seasonal component in the ACF plot shows a sharp decline after lag 1, which implies Q = 1,2.
+PACF Plot (Partial Autocorrelation Function Plot):
+
+The sharp drop after lag 2 in the PACF plot indicates a possible AR(1) process. This gives us p = 1,2.
+The seasonal component in the PACF plot also has a significant spike at lag 4, which implies P = 1. However, the dataset did not have a strong seasonal pattern. We can also consider P to be 0
+Order of Differencing:
+
+We applied first order differencing, so d = 1.
+You also mentioned seasonal differencing with a lag of 4, so D = 1.
+Combining these, we get:
+
+Non-seasonal parameters: p = 1,2, d = 1, q = 1,2
+Seasonal parameters: P = 0,1 D = 1, Q = 1, and the seasonal period (or frequency) is 2.
+Therefore, the ARIMA model can be represented as ARIMA(2,1,1)(0,1,1)[2].
+
+WE can continue analysis
+
+
+
+
+
+
+```{r}
+######################## Check for different combinations ########
+SARIMA.c=function(p1,p2,q1,q2,P1,P2,Q1,Q2,data){
+  temp=c()
+  d=1
+  D=1
+  s=2
+  
+  i=1
+  temp= data.frame()
+  ls=matrix(rep(NA,9*23),nrow=23)
+  
+  for (p in p1:p2)
+  {
+    for(q in q1:q2)
+    {
+      for(P in P1:P2)
+      {
+        for(Q in Q1:Q2)
+        {
+          if(p+d+q+P+D+Q<=9)
+          {
+            model<- Arima(data,order=c(p-1,d,q-1),seasonal=c(P-1,D,Q-1))
+            ls[i,]= c(p-1,d,q-1,P-1,D,Q-1,model$aic,model$bic,model$aicc)
+            i=i+1
+          }
+        }
+      }
+    }
+  }
+  
+  temp= as.data.frame(ls)
+  names(temp)= c("p","d","q","P","D","Q","AIC","BIC","AICc")
+  temp
+}
+
+
+  
+
+```
+
+```{r}
+# Based on the analysis:
+
+output=SARIMA.c(p1=1,p2=3,q1=1,q2=3,P1=1,P2=2,Q1=1,Q2=2,data=rmhi)
+knitr::kable(output)
+
+```
+
+
+```{r}
+output[which.min(output$AIC),] 
+```
+
+```{r}
+output[which.min(output$BIC),]
+```
+
+```{r}
+output[which.min(output$AICc),]
+```
+
+
+```{r}
+
+set.seed(236)
+model_output1 <- capture.output(sarima(rmhi, 2,1,1,0,1,1,2))
+model_output2 <- capture.output(sarima(rmhi, 0,1,1,0,1,1,2))
+```
+The second one is a little better.
+
+```{r}
+cat(model_output1[50:67], model_output1[length(model_output1)], sep = "\n") 
+```
+
+```{r}
+cat(model_output2[40:55], model_output2[length(model_output2)], sep = "\n") 
+```
+
+The Standard Residual Plot appears good, displaying okay stationarity with a nearly constant mean and variation.
+
+The Autocorrelation Function (ACF) plot shows almost no correlation indicating that the model has harnessed everything that left is white noise. This indicates a good model fit.
+
+The Quantile-Quantile (Q-Q) Plot still demonstrates near-normality.
+
+The Ljung-Box test results reveal values below the 0.05 (5% significance) threshold, indicating there’s some significant correlation left.
+
+$ttable: all coefficients are significant.
+The second one is better indeed.
+
+
+# Fit model
+
+```{r}
+fit2=arima(rmhi, order = c(0,1,1),seasonal = list(order=c(0,1,1), period=2) )
+summary(fit2)
+
+```
+
+
+```{r}
+# Autoplot with custom colors
+plot_fit_ <- autoplot(forecast(fit2,36)) + 
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    legend.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    legend.key = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Display the plot
+print(plot_fit_)
+
+```
+
+
+
+```{r}
+sarima.for(rmhi, 36, 0,1,1,0,1,1,2)
+```
+
+# Benchmathods Comparesion
+```{r}
+autoplot(rmhi) +
+  autolayer(forecast(fit2,36), 
+            series="fit") +
+  autolayer(meanf(rmhi, h=36),
+            series="Mean", PI=FALSE) +
+  autolayer(naive(rmhi, h=36),
+            series="Naïve", PI=FALSE) +
+  autolayer(snaive(rmhi, h=36),
+            series="SNaïve", PI=FALSE)+
+  autolayer(rwf(rmhi, h=36, drift=TRUE),
+            series="Drift", PI=FALSE)+
+  
+  guides(colour=guide_legend(title="Forecast"))
+```
+
+```{r}
+f1 <- meanf(rmhi, h=36)
+f2 <- snaive(rmhi, h=36) 
+f3 <-naive(rmhi, h=36)
+accuracy(f1)
+accuracy(f2)
+accuracy(f3)
+```
+
+```{r}
+summary(fit2)
+```
+
+Our model fitting is better than benchmark methods with smaller RMSE
+
+# Cross validation
+
+# One Step ahead
+```{r}
+n <- length(rmhi)
+n * 0.3
+```
+
+```{r}
+k <- 12 # Use enough number of data for model: 30% of my whole dataset
+
+n-k # rest of the observations
+```
+
+```{r,warning=FALSE}
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- rmhi[1:(k-1)+i] 
+  xtest <- rmhi[k+i] 
+  fit <- arima(xtrain, order = c(2,1,1),seasonal = list(order=c(0,1,1), period=2) )
+  fcast1 <- forecast(fit, h=1)
+  
+  fit2 <- arima(xtrain, order = c(0,1,1),seasonal = list(order=c(0,1,1), period=2) )
+  fcast2 <- forecast(fit2, h=1)
+  
+  #capture error for each iteration
+  # This is mean absolute error
+  err1 = c(err1, abs(fcast1$mean-xtest)) 
+  err2 = c(err2, abs(fcast2$mean-xtest))
+  
+  # This is mean squared error
+  err3 = c(err1, (fcast1$mean-xtest)^2)
+  err4 = c(err2, (fcast2$mean-xtest)^2)
+  
+}
+
+
+```
+
+```{r}
+MAE1=mean(err1) 
+MAE2=mean(err2)
+MSE1=mean(err3)
+MSE2=mean(err4)
+```
+
+```{r}
+# Create a dataframe
+error_metrics <- data.frame(
+  MAE1 = MAE1,
+  MAE2 = MAE2,
+  MSE1 = MSE1,
+  MSE2 = MSE2
+)
+
+# View the dataframe
+print(error_metrics)
+```
+We can see that the corresponding results for model 2: (2,1,1)(0,1,1) is slightly better. Which is not the same as the conclusion from above, the reason could be that the data points are relatively small. The train and test split can not capture the datasets effectively, which can cause the different conclusion. The model diagnotics from previsou section indicates that the (0,1,1)(0,1,1) is better with smaller errors.
+
+
+# 2 step ahead in my case
+```{r}
+
+farima1 <- function(x, h){forecast(arima(x, order = c(0,1,1),seasonal = list(order=c(0,1,1), period=2) ),h=h)}
+
+# Compute cross-validated errors for up to 2 steps ahead
+e <- tsCV(rmhi, forecastfunction = farima1, h = 2)
+ 
+length(e) 
+```
+
+```{r,warning=FALSE}
+# Compute the MSE values and remove missing values
+mse <- colMeans(e^2, na.rm = TRUE)
+
+# Plot the MSE values against the forecast horizon
+data.frame(h = 1:2, MSE = mse) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point()+geom_line()
+```
+
+From here we can see that the one step ahead has lower MSE, which is better than two step ahead in my case.
+
+

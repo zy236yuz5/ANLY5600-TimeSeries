@@ -6,7 +6,7 @@ https://fred.stlouisfed.org/series/FIXHAI	              Housing Affordability In
 https://fred.stlouisfed.org/series/PSAVERT                    Personal Saving Rate
 https://fred.stlouisfed.org/series/A191RI1Q225SBEA            Gross Domestic Product: Implicit Price Deflator
 https://www.zillow.com/research/data/			      All home prices in states in USA
-
+https://fred.stlouisfed.org/series/USAUCSFRCONDOSMSAMID	      Home Value Index (ZHVI)
 
 
 The Gini coefficient, also called the Gini Index or Gini ratio, is a statistical measure of distribution intended to represent the income or wealth distribution of a nation. It ranges from 0 (0%) to 1 (100%), with 0 representing perfect equality and 1 representing perfect inequality. A higher Gini coefficient means greater inequality. The Gini coefficient would be zero is everyone in a nation had the same income.   ----- https://worldpopulationreview.com/state-rankings/income-inequality-by-state

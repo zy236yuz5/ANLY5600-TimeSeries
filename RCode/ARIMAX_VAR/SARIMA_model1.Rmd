@@ -1,0 +1,331 @@
+---
+title: "datavis"
+author: "Zonghong Yu"
+date: "2023-09-18"
+output: html_document
+---
+
+```{r}
+library(reticulate)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(gridExtra)
+library(xts)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+library(plotly)
+library(TTR) # For the SMA function
+
+```
+
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df1 <- read.csv("../../Dataset/project/household_saving.csv")
+df2 <- read.csv("../../Dataset/project/MEHOINUSA672N.csv")
+df3 <- read.csv("../../Dataset/project/MSPUS.csv")
+df4 <- read.csv("../../Dataset/project/SIPOVGINIUSA.csv")
+df5 <- read.csv("../../Dataset/project/FIXHAI.csv")
+df6 <- read.csv("../../Dataset/project/PSAVERT.csv")
+df7 <- read.csv("../../Dataset/project/A191RI1Q225SBEA.csv")
+df8 <- read.csv("../../Dataset/project/Merged_downsample.csv")
+
+df1$DATE <- as.Date(df1$DATE)
+df2$DATE <- as.Date(df2$DATE)
+df3$DATE <- as.Date(df3$DATE)
+df4$DATE <- as.Date(df4$DATE)
+df5$DATE <- as.Date(df5$DATE)
+df6$DATE <- as.Date(df6$DATE)
+df7$DATE <- as.Date(df7$DATE)
+df8$date <- as.Date(df8$date)
+head(df8)
+```
+# Transform all to time series
+```{r}
+saving =ts(df1$W398RC1A027NBEA)
+income =ts(df2$MEHOINUSA672N)
+gini =ts(df4$SIPOVGINIUSA)
+afford =ts(df5$FIXHAI)
+saverate =ts(df6$PSAVERT)
+gdp =ts(df7$A191RI1Q225SBEA)
+
+saleprice =ts(df8$Mean.Sale.Price)
+homevalue =ts(df8$Mean.Home.Value)
+rentalprice =ts(df8$mean)
+```
+
+```{r}
+length(saving)
+length(income)
+length(gini)
+length(afford)
+length(saverate)
+length(gdp)
+length(saleprice)
+length(homevalue)
+length(rentalprice)
+
+```
+
+
+# Literatue Review to choose variables
+
+## Model 1
+```{r}
+dd1<-data.frame(homevalue,saleprice,rentalprice,df8$date)
+
+colnames(dd1)<-c("homevalue","saleprice","rentalprice",'date')
+
+knitr::kable(head(dd1))
+```
+
+```{r,warning=FALSE}
+lg.dd1 <- data.frame("date" =dd1$date,"homevalue"=log(dd1$homevalue),"saleprice"=log(dd1$saleprice),
+                                        "rentalprice"=log(dd1$rentalprice))
+
+#### converting to time series component #########
+lg.dd.ts1<-ts(lg.dd1,frequency = 4)
+
+##### Facet Plot #######################
+autoplot(lg.dd.ts1[,c(2:4)], facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("The Household Prices in USA")
+```
+
+
+Auto Fit
+
+```{r}
+xreg1 <- cbind(saleprice = lg.dd.ts1[, "saleprice"],
+              rentalprice = lg.dd.ts1[, "rentalprice"])
+
+fit1 <- auto.arima(lg.dd.ts1[, "homevalue"], xreg = xreg1)
+summary(fit1)
+```
+
+
+Manual Fit
+```{r}
+fit.reg1 <- lm( homevalue ~ saleprice+ rentalprice, data=lg.dd.ts1)
+summary(fit.reg1)
+```
+We can see that the variables are pretty significant.
+
+```{r}
+checkresiduals(fit1)
+```
+Based on the output, there's no indication that seasonal terms are being used and the datasets did not have too much seasonal pattern. Therefore, this is an ARIMAX model.
+
+```{r}
+########### Converting to Time Series component #######
+
+res.fit1<-ts(residuals(fit.reg1),frequency = 4)
+
+############## Then look at the residuals ############
+ggAcf(res.fit1)
+
+```
+
+```{r}
+ggPacf(res.fit1)
+```
+
+Since there is no major seasonal pattern. We use differencing directly
+```{r}
+
+# Extract the ACF and PACF plots without the theme
+acf_plot <- ggAcf(diff(res.fit1, differences = 1)) +
+  labs(title = "ACF for first Order of Differencing and Seasonal Differenceing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(diff(res.fit1, differences = 1)) +
+  labs(title = "PACF for first Orders of Differencing and Seasonal Differenceing") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(acf_plot, pacf_plot, ncol = 1)             
+
+```
+Now, it is mostly stationary for us to continue
+From ACF and PACF, it seems that we can consider: p = 1,2,3 q = 1,2,3. We use first order of differencing so d = 1.
+There is no major seasonal pattern, therefore, no P,Q,D in this case.
+
+## Model Diagnotistics
+Finding the model parameters.
+```{r,warning=FALSE}
+d=1
+i=1
+temp= data.frame()
+ls=matrix(rep(NA,6*23),nrow=23) # roughly nrow = 3x4x2
+
+
+for (p in 3:5)# p=1,2,3 : 3
+{
+  for(q in 3:5)# q=1,2,3,4 :4
+  {
+    for(d in 1:3)# d=1,2 :2
+    {
+      
+      if(p-1+d+q-1<=8) #usual threshold
+      {
+        
+        model<- Arima(res.fit1,order=c(p-1,d,q-1),include.drift=TRUE) 
+        ls[i,]= c(p-1,d,q-1,model$aic,model$bic,model$aicc)
+        i=i+1
+        #print(i)
+        
+      }
+      
+    }
+  }
+}
+
+temp= as.data.frame(ls)
+names(temp)= c("p","d","q","AIC","BIC","AICc")
+
+#temp
+knitr::kable(temp)
+
+
+```
+
+```{r}
+temp[which.min(temp$AIC),]
+```
+
+```{r}
+temp[which.min(temp$BIC),]
+```
+
+```{r}
+temp[which.min(temp$AICc),]
+```
+From here, we have two potential ones: (2,1,2) and (2,1,4)
+Compare:
+
+```{r}
+set.seed(236)
+
+model_output11 <- capture.output(sarima(res.fit1, 2,1,4)) 
+model_output12 <- capture.output(sarima(res.fit1, 2,1,2)) 
+```
+```{r}
+cat(model_output11[90:123], model_output11[length(model_output11)], sep = "\n")
+cat(model_output12[40:70], model_output12[length(model_output12)], sep = "\n")
+```
+
+Based on this, I think the second one (2,1,4) is slightly better with less correlation and smaller AIC value.
+
+
+## cross validation
+```{r}
+n=length(res.fit1)
+n *0.3 
+```
+
+```{r}
+k=324
+ 
+rmse1 <- matrix(NA, 53,4)
+rmse2 <- matrix(NA,53,4)
+rmse3 <- matrix(NA,53,4)
+
+st <- tsp(res.fit1)[1]+(k-1)/4 
+
+for(i in 1:53)
+{
+  xtrain <- window(res.fit1, end=st + i-1)
+  xtest <- window(res.fit1, start=st + (i-1) + 1/4, end=st + i)
+  
+
+  
+  fit <- Arima(xtrain, order=c(2,1,4),
+                include.drift=TRUE, method="ML")
+  fcast <- forecast(fit, h=4)
+  
+  fit2 <- Arima(xtrain, order=c(2,1,2),
+                include.drift=TRUE, method="ML")
+  fcast2 <- forecast(fit2, h=4)
+  
+  
+
+  rmse1[i,1:length(xtest)]  <- sqrt((fcast$mean-xtest)^2)
+  rmse2[i,1:length(xtest)] <- sqrt((fcast2$mean-xtest)^2)
+
+  
+}
+
+plot(1:4, colMeans(rmse1,na.rm=TRUE), type="l", col=2, xlab="horizon", ylab="RMSE")
+lines(1:4, colMeans(rmse2,na.rm=TRUE), type="l",col=3)
+
+legend("topleft",legend=c("fit1","fit2"),col=2:3,lty=1)
+```
+
+```{r}
+colMeans( rmse1,na.rm=TRUE)
+colMeans( rmse2,na.rm=TRUE)
+```
+Based on the cross validation, we can see that the conclusion aligns, the fit1 which is (2,1,4) performs better with smaller errors.
+
+
+## Fit the model
+
+
+
+```{r}
+xreg1 <- cbind(saleprice = lg.dd.ts1[, "saleprice"],
+              rentalprice = lg.dd.ts1[, "rentalprice"])
+
+
+fit1 <- Arima(lg.dd.ts1[, "homevalue"],order=c(2,1,4),xreg=xreg1)
+summary(fit1)
+```
+The equation:
+Given that `y_t` represents the log-transformed `homevalue` at time `t`, the ARIMA(2,1,4) can be:
+
+(1 - φ₁B - φ₂B²)(1 - B)yₜ = α + β₁ * salepriceₜ + β₂ * rentalpriceₜ + (1 + θ₁B + θ₂B² + θ₃B³ + θ₄B⁴)εₜ
+
+
+Based on the summary, my equation is
+
+(1 - 0.8151B - 0.0766B²)(1 - B)yₜ = α + 0.8651 * salepriceₜ + 0.1058 * rentalpriceₜ + (1 - 1.2454B + 0.1814B² - 0.1233B³ + 0.1903B⁴)εₜ
+
+## Forecast
+```{r}
+spfit<-auto.arima(lg.dd.ts1[, "saleprice"]) 
+summary(spfit) 
+```
+
+```{r}
+fsp<-forecast(spfit,80) #obtaining forecasts
+
+rpfit<-auto.arima(lg.dd.ts1[, "rentalprice"]) #fitting an ARIMA model to the Import variable
+summary(rpfit)
+```
+
+```{r}
+frp<-forecast(rpfit,80)
+
+fxreg <- cbind(saleprice = fsp$mean, 
+              rentalprice = frp$mean) #fimp$mean gives the forecasted values
+
+
+
+fcast <- forecast(fit1, xreg=fxreg,80) 
+autoplot(fcast, main="Forecast of Home Values") + xlab("Year") +
+  ylab("Home")
+```

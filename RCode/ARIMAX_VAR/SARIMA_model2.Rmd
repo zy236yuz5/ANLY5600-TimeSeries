@@ -1,0 +1,355 @@
+---
+title: "datavis"
+author: "Zonghong Yu"
+date: "2023-09-18"
+output: html_document
+---
+
+```{r}
+library(reticulate)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(gridExtra)
+
+library(xts)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+library(plotly)
+library(TTR) # For the SMA function
+
+```
+
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df1 <- read.csv("../../Dataset/project/household_saving.csv")
+df2 <- read.csv("../../Dataset/project/MEHOINUSA672N.csv")
+df3 <- read.csv("../../Dataset/project/MSPUS.csv")
+df4 <- read.csv("../../Dataset/project/SIPOVGINIUSA.csv")
+df5 <- read.csv("../../Dataset/project/FIXHAI.csv")
+df6 <- read.csv("../../Dataset/project/PSAVERT.csv")
+df7 <- read.csv("../../Dataset/project/A191RI1Q225SBEA.csv")
+df8 <- read.csv("../../Dataset/project/Merged_downsample.csv")
+
+df1$DATE <- as.Date(df1$DATE)
+df2$DATE <- as.Date(df2$DATE)
+df3$DATE <- as.Date(df3$DATE)
+df4$DATE <- as.Date(df4$DATE)
+df5$DATE <- as.Date(df5$DATE)
+df6$DATE <- as.Date(df6$DATE)
+df7$DATE <- as.Date(df7$DATE)
+df8$date <- as.Date(df8$date)
+head(df1)
+head(df2)
+head(df3)
+```
+# Transform all to time series
+```{r}
+saving =ts(df1$W398RC1A027NBEA)
+income =ts(df2$MEHOINUSA672N)
+sale = ts(df3$MSPUS)
+gini =ts(df4$SIPOVGINIUSA)
+afford =ts(df5$FIXHAI)
+saverate =ts(df6$PSAVERT)
+gdp =ts(df7$A191RI1Q225SBEA)
+
+saleprice =ts(df8$Mean.Sale.Price)
+homevalue =ts(df8$Mean.Home.Value)
+rentalprice =ts(df8$mean)
+```
+
+```{r}
+# Define start and end dates
+start_date <- as.Date("1992-01-01")
+end_date <- as.Date("2020-12-31")
+
+# Subset data frames to include only data from 1992 through 2020
+df1_sub <- subset(df1, DATE >= start_date & DATE <= end_date)
+df2_sub <- subset(df2, DATE >= start_date & DATE <= end_date)
+df6_sub <- subset(df6, DATE >= start_date & DATE <= end_date)
+
+# Assuming the data is annual for this example. If it's quarterly, you'd use frequency = 4; if monthly, frequency = 12.
+frequency <- 1
+
+# Create ts objects
+saving <- ts(df1_sub$W398RC1A027NBEA, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+income <- ts(df2_sub$MEHOINUSA672N, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+rate <- ts(df6_sub$PSAVERT, start = c(1992, 1), end = c(2020, 1), frequency = frequency)
+
+```
+
+
+saving rate, income, saveing can be interesting to be evaluated
+
+
+
+## Model 2
+```{r}
+dd2<-data.frame(rate,saving,income,df1_sub$DATE)
+
+colnames(dd2)<-c("saving_rate","household_saving","household_income",'date')
+
+knitr::kable(head(dd2))
+```
+
+
+```{r,warning=FALSE}
+lg.dd2 <- data.frame("date" =dd2$date,"saving_rate"=log(dd2$saving_rate),"household_saving"=log(dd2$household_saving),
+                                        "household_income"=log(dd2$household_income))
+
+#### converting to time series component #########
+lg.dd.ts2<-ts(lg.dd2,frequency = 4)
+
+##### Facet Plot #######################
+autoplot(lg.dd.ts2[,c(2:4)], facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("The Household Prices in USA")
+```
+
+
+Auto Fit
+
+```{r}
+xreg2 <- cbind(household_income = lg.dd.ts2[, "household_income"],
+              household_saving = lg.dd.ts2[, "household_saving"])
+
+fit2 <- auto.arima(lg.dd.ts2[, "saving_rate"], xreg = xreg2)
+summary(fit2)
+```
+
+
+Manual Fit
+```{r}
+fit.reg2 <- lm( saving_rate ~  household_saving + household_income, data=lg.dd.ts2)
+summary(fit.reg2)
+```
+It seems that the household income did not play any important role. Therefore, We can consider to remove it.
+
+```{r}
+fit.reg2 <- lm( saving_rate ~  household_saving, data=lg.dd.ts2)
+summary(fit.reg2)
+```
+We can see that the variables are pretty significant.
+
+```{r}
+checkresiduals(fit2)
+```
+Based on the output, there's no indication that seasonal terms are being used and the datasets did not have too much seasonal pattern. Therefore, this is an ARIMAX model.
+
+```{r}
+########### Converting to Time Series component #######
+
+res.fit2<-ts(residuals(fit.reg2),frequency = 2)
+
+############## Then look at the residuals ############
+ggAcf(res.fit2)
+
+```
+
+```{r}
+ggPacf(res.fit2)
+```
+
+Since there is no major seasonal pattern. And it seems that the data is already stationary
+```{r}
+
+# Extract the ACF and PACF plots without the theme
+acf_plot <- ggAcf(res.fit2) +
+  labs(title = "ACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(res.fit2) +
+  labs(title = "PACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(acf_plot, pacf_plot, ncol = 1)             
+
+```
+Now, it is mostly stationary for us to continue
+From ACF and PACF, it seems that we can consider: p = 1,2 q = 1,2. We use first order of differencing so d = 0.
+There is no major seasonal pattern, therefore, no P,Q,D in this case.
+
+## Model Diagnotistics
+Finding the model parameters.
+```{r,warning=FALSE}
+d=1
+i=1
+temp= data.frame()
+ls=matrix(rep(NA,6*23),nrow=23) # roughly nrow = 3x4x2
+
+
+for (p in 3:5)# p=1,2,3 : 3
+{
+  for(q in 3:5)# q=1,2,3,4 :4
+  {
+    for(d in 1:3)# d=1,2 :2
+    {
+      
+      if(p-1+d+q-1<=8) #usual threshold
+      {
+        
+        model<- Arima(res.fit2,order=c(p-1,d,q-1),include.drift=TRUE) 
+        ls[i,]= c(p-1,d,q-1,model$aic,model$bic,model$aicc)
+        i=i+1
+        #print(i)
+        
+      }
+      
+    }
+  }
+}
+
+temp= as.data.frame(ls)
+names(temp)= c("p","d","q","AIC","BIC","AICc")
+
+#temp
+knitr::kable(temp)
+
+
+```
+
+```{r}
+temp[which.min(temp$AIC),]
+```
+
+```{r}
+temp[which.min(temp$BIC),]
+```
+
+```{r}
+temp[which.min(temp$AICc),]
+```
+From here, we have two potential ones: (2,1,2) and (0,0,0) from part 1
+Compare:
+
+```{r}
+set.seed(236)
+
+model_output21 <- capture.output(sarima(res.fit2, 2,1,2)) 
+model_output22 <- capture.output(sarima(res.fit2, 0,0,0)) 
+```
+```{r}
+cat(model_output21[145:160], model_output21[length(model_output21)], sep = "\n")
+```
+
+```{r}
+
+cat(model_output22[20:38], model_output22[length(model_output22)], sep = "\n")
+```
+
+Based on this, I think the first one (2,1,2) is slightly better with less correlation and closer to the significant level.
+
+
+## cross validation
+```{r}
+n=length(res.fit2)
+n *0.3 
+```
+
+```{r,warning=FALSE}
+k=9
+ 
+rmse1 <- matrix(NA, 40,2)
+rmse2 <- matrix(NA,40,2)
+rmse3 <- matrix(NA,40,2)
+
+st <- tsp(res.fit2)[1]+(k-1)/4 
+
+for(i in 1:12)
+{
+  xtrain <- window(res.fit2, end=st + i-1)
+  xtest <- window(res.fit2, start=st + (i-1) + 1/4, end=st + i)
+  
+
+  
+  fit <- Arima(xtrain, order=c(2,1,2),
+                include.drift=TRUE, method="ML")
+  fcast <- forecast(fit, h=4)
+  
+  fit2 <- Arima(xtrain, order=c(0,0,0),
+                include.drift=TRUE, method="ML")
+  fcast2 <- forecast(fit2, h=4)
+  
+  
+
+  rmse1[i,1:length(xtest)]  <- sqrt((fcast$mean-xtest)^2)
+  rmse2[i,1:length(xtest)] <- sqrt((fcast2$mean-xtest)^2)
+
+  
+}
+
+plot(1:2, colMeans(rmse1,na.rm=TRUE), type="l", col=2, xlab="horizon", ylab="RMSE")
+lines(1:2, colMeans(rmse2,na.rm=TRUE), type="l",col=3)
+
+legend("topleft",legend=c("fit1","fit2"),col=2:3,lty=1)
+```
+Here, although
+
+```{r}
+colMeans( rmse1,na.rm=TRUE)
+colMeans( rmse2,na.rm=TRUE)
+```
+Based on the cross validation, overall, the two method is simiarly within expectation. We can see that although model (0,0,0) has smaller errors after, the dataset is relatively biased due to the size of the date overlapping. We should still use the fit1 which is (2,1,2) to perform later analysis.
+
+
+## Fit the model
+
+
+
+```{r}
+xreg2 <- cbind(household_income = lg.dd.ts2[, "household_income"],
+              household_saving = lg.dd.ts2[, "household_saving"])
+
+
+fit2 <- Arima(lg.dd.ts2[, "saving_rate"],order=c(2,1,2),xreg=xreg2)
+summary(fit2)
+```
+The equation:
+Given that `y_t` represents the log-transformed `homevalue` at time `t`, the ARIMA(2,1,4) can be:
+
+(1 - φ₁B - φ₂B²)(1 - B)yₜ = α + β₁ * salepriceₜ + β₂ * rentalpriceₜ + (1 + θ₁B + θ₂B² + θ₃B³ + θ₄B⁴)εₜ
+
+
+Based on the summary, my equation for this model is
+
+(1 - 0.4885B - (-0.4602)B^2)(1 - B)y_t = \alpha + 0.1188 \cdot \text{household_income}_t - 0.1330 \cdot \text{household_saving}_t + (1 - 1.2187B + 0.5136B^2)\varepsilon_t
+
+
+## Forecast
+```{r}
+hsfit<-auto.arima(lg.dd.ts2[, "household_saving"]) 
+summary(hsfit) 
+```
+
+```{r}
+fhs<-forecast(hsfit,12) #obtaining forecasts
+
+hifit<-auto.arima(lg.dd.ts2[, "household_income"]) #fitting an ARIMA model to the Import variable
+summary(rpfit)
+```
+
+```{r}
+fhi<-forecast(hifit,12)
+
+fxreg <- cbind(household_income = fhi$mean,household_saving = fhs$mean
+              ) #fimp$mean gives the forecasted values
+
+fcast <- forecast(fit2, xreg=fxreg,12) 
+autoplot(fcast, main="Forecast of Saving Rate") + xlab("Year") +
+  ylab("Saving Rate")
+```

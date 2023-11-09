@@ -1,0 +1,534 @@
+---
+title: "datavis"
+author: "Zonghong Yu"
+date: "2023-09-18"
+output: html_document
+---
+
+```{r}
+library(reticulate)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(gridExtra)
+library(vars)
+library(xts)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+library(plotly)
+library(TTR) # For the SMA function
+
+```
+
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df1 <- read.csv("../../Dataset/project/household_saving.csv")
+df2 <- read.csv("../../Dataset/project/MEHOINUSA672N.csv")
+df3 <- read.csv("../../Dataset/project/MSPUS.csv")
+df4 <- read.csv("../../Dataset/project/SIPOVGINIUSA.csv")
+df5 <- read.csv("../../Dataset/project/FIXHAI.csv")
+df6 <- read.csv("../../Dataset/project/PSAVERT.csv")
+df7 <- read.csv("../../Dataset/project/A191RI1Q225SBEA.csv")
+df8 <- read.csv("../../Dataset/project/Merged_downsample.csv")
+df9 <- read.csv("../../Dataset/project/USAUCSFRCONDOSMSAMID.csv")
+df1$DATE <- as.Date(df1$DATE)
+df2$DATE <- as.Date(df2$DATE)
+df3$DATE <- as.Date(df3$DATE)
+df4$DATE <- as.Date(df4$DATE)
+df5$DATE <- as.Date(df5$DATE)
+df6$DATE <- as.Date(df6$DATE)
+df7$DATE <- as.Date(df7$DATE)
+df8$date <- as.Date(df8$date)
+df9$DATE <- as.Date(df9$DATE)
+head(df9)
+```
+# Transform all to time series
+```{r}
+saving =ts(df1$W398RC1A027NBEA)
+income =ts(df2$MEHOINUSA672N)
+sale = ts(df3$MSPUS)
+gini =ts(df4$SIPOVGINIUSA)
+afford =ts(df5$FIXHAI)
+saverate =ts(df6$PSAVERT)
+gdp =ts(df7$A191RI1Q225SBEA)
+
+
+homevalue =ts(df9$USAUCSFRCONDOSMSAMID)
+
+```
+
+
+
+```{r}
+length(saving)
+length(income)
+length(sale)
+length(gini)
+length(afford)
+length(saverate)
+length(gdp)
+length(homevalue)
+
+
+```
+
+```{r}
+df7_sub$DATE
+```
+
+Home Value ~ Saving Rate + Gdp Deflator + Sale Price
+```{r}
+# Define start and end dates
+start_date <- as.Date("2000-01-01")
+end_date <- as.Date("2020-12-31")
+
+# Subset data frames to include only data from 1992 through 2020
+df3_sub <- subset(df3, DATE >= start_date & DATE <= end_date)
+df6_sub <- subset(df6, DATE >= start_date & DATE <= end_date)
+df7_sub <- subset(df7, DATE >= start_date & DATE <= end_date)
+df9_sub <- subset(df9, DATE >= start_date & DATE <= end_date)
+
+# Assuming the data is annual for this example. If it's quarterly, you'd use frequency = 4; if monthly, frequency = 12.
+frequency <- 4
+
+# Create ts objects
+sale <- ts(df3_sub$MSPUS, start = c(2000, 1), end = c(2020, 1), frequency = frequency)
+saving <- ts(df6_sub$PSAVERT, start = c(2000, 1), end = c(2020, 1), frequency = frequency)
+gdp <- ts(df7_sub$A191RI1Q225SBEA, start = c(2000, 1), end = c(2020, 1), frequency = frequency)
+homevalue <- ts(df9_sub$USAUCSFRCONDOSMSAMID, start = c(2000, 1), end = c(2020, 1), frequency = frequency)
+DATE <- ts(df7_sub$DATE, start = c(2000, 1), end = c(2020, 1), frequency = frequency)
+```
+
+```{r}
+length(sale)
+length(saving )
+length(gdp)
+length(homevalue)
+length(DATE)
+```
+
+```{r}
+DATE
+```
+
+
+## Model 3 (VAR)
+```{r}
+dd3<-data.frame(homevalue,saving,gdp,sale,DATE)
+
+colnames(dd3)<-c("homevalue","saving","gdp_deflator", "sale",'date')
+
+knitr::kable(head(dd3))
+```
+
+```{r,warning=FALSE}
+lg.dd3 <- data.frame("date" =dd3$date,"sale"=log(dd3$sale),"saving"=log(dd3$saving),"homevalue"=log(dd3$homevalue),
+                                        "gdp_deflator"=log(dd3$gdp))
+
+#### converting to time series component #########
+lg.dd.ts3<-ts(lg.dd3,frequency = 4)
+
+##### Facet Plot #######################
+autoplot(lg.dd.ts3[,c(2:5)], facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("The GDP Deflator, Sale Price, Saving Rate, Home value in USA")
+```
+
+Fitting a VAR model:
+Finding out the best p:
+```{r}
+VARselect(dd3[, c(2:5)], lag.max=14, type="both")
+```
+From the results, we can see that 13,14 have relatively smaller criterias:
+
+We can fit several models with p=13, 14.=>  VAR(13), VAR(14)
+```{r}
+summary(vars::VAR(dd3[, c(2:5)], p=13, type='both'))
+```
+```{r}
+summary(vars::VAR(dd3[, c(2:5)], p=14, type='both'))
+```
+
+
+We can see that some models have some variables significant but not all. We will keep the variables and make comparison in the next steps to get the better one.
+
+
+## CV
+
+```{r}
+n=length(dd3$gdp_deflator)
+n*0.3
+```
+```{r}
+k=25 #19*4
+n-k
+```
+
+```{r}
+dd3
+```
+
+
+
+
+
+
+
+
+```{r}
+dat = ts(dd3[,c(1,2,3,4)])
+```
+
+
+```{r}
+
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- dat[,c(1)][1:(k-1)+i] 
+  xtest <- dat[,c(1)][k+i] 
+  
+  fit <- vars::VAR(dat, p=13, type='both')
+  fcast1 <- forecast(fit, h=4)
+  fcast1 = predict(fit, n.ahead = 12, ci = 0.95)
+ 
+  
+  fit2 <- vars::VAR(dat, p=14, type='both')
+  fcast2 <- forecast(fit2, h=4)
+  fcast2 = predict(fit2, n.ahead = 12, ci = 0.95)
+  
+  #capture error for each iteration
+  # This is RMSE
+  err1 = c(err1, sqrt((fcast1$fcst$gdp_deflator-xtest)^2))
+  err2 = c(err2, sqrt((fcast2$fcst$gdp_deflator-xtest)^2))
+
+}
+
+
+```
+
+
+
+
+```{r}
+# Normalize function
+normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalize e1 and e2
+normalized_e1 <- normalize(err1)
+normalized_e2 <- normalize(err2)
+
+
+
+# Set the background color of the plot region to #E0E0E0
+par(bg = "#E0E0E0")
+
+# Plot the normalized e1 with a red line
+plot(normalized_e1+ e, type="l", col="red", ylim=range(c(normalized_e1, normalized_e2 + e)), xlab="Index", ylab="Normalized Values", main="Normalized RMSE Plot of e1 and e2 For Home Value")
+
+# Add the normalized e2 with an offset and a blue line
+lines(normalized_e2 , type="l", col="blue")
+
+# Add a legend to distinguish the lines
+legend("topright", legend=c("e1", "e2"), col=c("red", "blue"), lty=1, cex=0.8)
+
+
+```
+
+
+```{r}
+error1 <- as.numeric(err1)
+error1 <- error1[!is.na(error1) & !is.nan(error1)]
+error1 <- mean(error1)
+
+error2 <- as.numeric(err2)
+error2 <- error2[!is.na(error2) & !is.nan(error2)]
+error2 <- mean(error2)
+
+
+error1
+error2
+
+```
+
+```{r}
+
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- dat[,c(2)][1:(k-1)+i] 
+  xtest <- dat[,c(2)][k+i] 
+  
+  fit <- vars::VAR(dat, p=13, type='both')
+  fcast1 <- forecast(fit, h=4)
+  fcast1 = predict(fit, n.ahead = 12, ci = 0.95)
+ 
+  
+  fit2 <- vars::VAR(dat, p=14, type='both')
+  fcast2 <- forecast(fit2, h=4)
+  fcast2 = predict(fit2, n.ahead = 12, ci = 0.95)
+  
+  #capture error for each iteration
+  # This is RMSE
+  err1 = c(err1, sqrt((fcast1$fcst$gdp_deflator-xtest)^2))
+  err2 = c(err2, sqrt((fcast2$fcst$gdp_deflator-xtest)^2))
+
+}
+
+
+```
+
+
+
+
+```{r}
+# Normalize function
+normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalize e1 and e2
+normalized_e1 <- normalize(err1)
+normalized_e2 <- normalize(err2)
+
+
+
+# Set the background color of the plot region to #E0E0E0
+par(bg = "#E0E0E0")
+
+# Plot the normalized e1 with a red line
+plot(normalized_e1+ e, type="l", col="red", ylim=range(c(normalized_e1, normalized_e2 + e)), xlab="Index", ylab="Normalized Values", main="Normalized RMSE Plot of e1 and e2 For Saving Rate")
+
+# Add the normalized e2 with an offset and a blue line
+lines(normalized_e2 , type="l", col="blue")
+
+# Add a legend to distinguish the lines
+legend("topright", legend=c("e1", "e2"), col=c("red", "blue"), lty=1, cex=0.8)
+
+
+```
+
+
+```{r}
+error1 <- as.numeric(err1)
+error1 <- error1[!is.na(error1) & !is.nan(error1)]
+error1 <- mean(error1)
+
+error2 <- as.numeric(err2)
+error2 <- error2[!is.na(error2) & !is.nan(error2)]
+error2 <- mean(error2)
+
+
+error1
+error2
+
+```
+
+
+For gdp deflator
+```{r}
+
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- dat[,c(3)][1:(k-1)+i] 
+  xtest <- dat[,c(3)][k+i] 
+  
+  fit <- vars::VAR(dat, p=13, type='both')
+  fcast1 <- forecast(fit, h=4)
+  fcast1 = predict(fit, n.ahead = 12, ci = 0.95)
+ 
+  
+  fit2 <- vars::VAR(dat, p=14, type='both')
+  fcast2 <- forecast(fit2, h=4)
+  fcast2 = predict(fit2, n.ahead = 12, ci = 0.95)
+  
+  #capture error for each iteration
+  # This is RMSE
+  err1 = c(err1, sqrt((fcast1$fcst$gdp_deflator-xtest)^2))
+  err2 = c(err2, sqrt((fcast2$fcst$gdp_deflator-xtest)^2))
+
+}
+
+
+```
+
+
+
+```{r}
+# Normalize function
+normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalize e1 and e2
+normalized_e1 <- normalize(err1)
+normalized_e2 <- normalize(err2)
+
+
+
+# Set the background color of the plot region to #E0E0E0
+par(bg = "#E0E0E0")
+
+# Plot the normalized e1 with a red line
+plot(normalized_e1+ e, type="l", col="red", ylim=range(c(normalized_e1, normalized_e2 + e)), xlab="Index", ylab="Normalized Values", main="Normalized RMSE Plot of e1 and e2 For GDP Deflator")
+
+# Add the normalized e2 with an offset and a blue line
+lines(normalized_e2 , type="l", col="blue")
+
+# Add a legend to distinguish the lines
+legend("topright", legend=c("e1", "e2"), col=c("red", "blue"), lty=1, cex=0.8)
+
+
+```
+
+```{r}
+error1 <- as.numeric(err1)
+error1 <- error1[!is.na(error1) & !is.nan(error1)]
+error1 <- mean(error1)
+
+error2 <- as.numeric(err2)
+error2 <- error2[!is.na(error2) & !is.nan(error2)]
+error2 <- mean(error2)
+
+
+error1
+error2
+
+```
+
+```{r}
+
+i=1
+err1 = c()
+err2 = c()
+
+for(i in 1:(n-k))
+{
+  xtrain <- dat[,c(4)][1:(k-1)+i] 
+  xtest <- dat[,c(4)][k+i] 
+  
+  fit <- vars::VAR(dat, p=13, type='both')
+  fcast1 <- forecast(fit, h=4)
+  fcast1 = predict(fit, n.ahead = 12, ci = 0.95)
+ 
+  
+  fit2 <- vars::VAR(dat, p=14, type='both')
+  fcast2 <- forecast(fit2, h=4)
+  fcast2 = predict(fit2, n.ahead = 12, ci = 0.95)
+  
+  #capture error for each iteration
+  # This is RMSE
+  err1 = c(err1, sqrt((fcast1$fcst$gdp_deflator-xtest)^2))
+  err2 = c(err2, sqrt((fcast2$fcst$gdp_deflator-xtest)^2))
+
+}
+
+
+```
+
+
+
+
+```{r}
+# Normalize function
+normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalize e1 and e2
+normalized_e1 <- normalize(err1)
+normalized_e2 <- normalize(err2)
+
+
+
+# Set the background color of the plot region to #E0E0E0
+par(bg = "#E0E0E0")
+
+# Plot the normalized e1 with a red line
+plot(normalized_e1+ e, type="l", col="red", ylim=range(c(normalized_e1, normalized_e2 + e)), xlab="Index", ylab="Normalized Values", main="Normalized RMSE Plot of e1 and e2 For Sale Price")
+
+# Add the normalized e2 with an offset and a blue line
+lines(normalized_e2 , type="l", col="blue")
+
+# Add a legend to distinguish the lines
+legend("topright", legend=c("e1", "e2"), col=c("red", "blue"), lty=1, cex=0.8)
+
+
+```
+
+
+```{r}
+error1 <- as.numeric(err1)
+error1 <- error1[!is.na(error1) & !is.nan(error1)]
+error1 <- mean(error1)
+
+error2 <- as.numeric(err2)
+error2 <- error2[!is.na(error2) & !is.nan(error2)]
+error2 <- mean(error2)
+
+
+error1
+error2
+
+```
+
+
+
+The second one VAR(14) is better for Home Value and Sale Price, However, overall, not too different
+The first one VAR(13) is better for GDP Deflator and Saving Rate
+Therefore, VAR(13) is relatively better than VAR(14)
+
+
+
+
+
+Forecast
+```{r}
+
+fit1 <- vars::VAR(dat[,1:4], p=13, type="const")
+fcast1 = predict(fit1, n.ahead = 8, ci = 0.95)
+fcast1$fcst$gdp_deflator
+```
+
+```{r}
+fcast1$fcst$sale
+```
+
+
+```{r}
+fcast1$fcst$saving
+```
+
+```{r}
+fcast1$fcst$homevalue
+```
+
+```{r}
+fcast1$fcst$sale
+```
+
+```{r}
+forecast(fit1,48) %>%
+  autoplot() + xlab("Year")
+```
