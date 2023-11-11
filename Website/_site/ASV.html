@@ -289,7 +289,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#forecasts" id="toc-forecasts" class="nav-link" data-scroll-target="#forecasts">Forecasts</a></li>
   </ul></li>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
   </ul>
 </nav>
     </div>
@@ -316,6 +315,31 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Discription:</p>
 <section id="literatue-review-to-choose-variables-and-models" class="level1">
 <h1>Literatue Review to choose variables and models</h1>
+<p>The key of my project big picture is to identify the impacts and correlations among Incomes and Housing Prices. Therefore, houseing prices such as home values, sale prices, and rental prices are very crucial to utilize models. Different aspects of the feature will be included such as the housing prices, incomes, gdp, gini index to check the affordability. By using the datasets and factors, we can evaluate the correlations and impacts among them to better help us understand the effect and gain insights about the disparities and inbalance of the wealth. In addition, it can also help us to make predictions for the future such that we can act now to solve the potential global issues.</p>
+<p>Therefore, my models would be:</p>
+<ol type="1">
+<li>ARIMAX Model for Home Value ~ Sale Price + Rental Price</li>
+</ol>
+<p>The reason is that I think that Sale and rental prices are directly linked to home values. The sale price is an immediate indicator of market valuation, while rental prices reflect ongoing demand and income potential from properties. I expect a strong correlation between these variables and home value. By utilizing the ARIMAX Model, it can help me capture both the time series nature of housing data and the sale and rental prices to get a better understanding of the situation.</p>
+<p>Then, the first model focus on the Housing Prices, the second model will focus on the income parts. The goal of my project is to find correlations and impacts among these features. Therefore, in this case, for personal income, saving rate and household savings are important factors that I should include in my analsyis.</p>
+<ol start="2" type="1">
+<li>ARIMAX Model for Saving Rate ~ Household Income + Household Saving</li>
+</ol>
+<p>The reason for chooing these three variables is that Household income and savings are fundamental determinants of the saving rate. Increased income typically leads to higher saving rates. Household savings directly contribute to the overall saving rate. And with more savings, there are more chances to look for a new home or look for a higher home prices. Which can also be connected to me first model.</p>
+<p>Then, I must also evaluate the economic as a whole. Tehrefore, gdp deflator would be a good choice. By using, gdp, sale price, and saving rate, I combine the bigger effect of economic, individual aspect, and the market sale price together to evaluate the correlations and impacts.</p>
+<ol start="3" type="1">
+<li>VAR Model for Sale Price, Saving Rate, GDP Deflator</li>
+</ol>
+<p>I choose (VAR) model because I think that it is suitable for multivariate time series data where variables are interdependent. Since I want to look for connections among these three features, VAR allows for the examination of how a variable is affected by its own lagged values and the lagged values of others, crucial in studying economic systems.</p>
+<ol start="4" type="1">
+<li>ARIMAX Model for GINI Index (Household Income + Household Saving + Sale Price)</li>
+</ol>
+<p>Then, I decide to use the GINI index as my fourth major objective in ARIMAX model. It is a measure of income inequality, which also be affected by household income, savings, and property values. Higher income and savings typically indicate more wealth but there are many people that do not have high wealth which make the inequality. The sale price of homes can reflect wealth disparities as well. Therefore, the usage of the three variables and ARIMAX model can help capturing both the influences of these specific among each other and the time series nature of the GINI index. This model helps understand how current and past economic conditions impact income inequality.</p>
+<p>Finally, I plan to use var model on home value, saving rate, gdp deflator, and sale price. The reason: Home values are also influenced by overall economic conditions, represented by the GDP deflator, and directly by the housing market dynamics, represented by sale prices. And by adding the saving rate, we can see that what are the total impacts of these varaibles as a whole.</p>
+<ol start="5" type="1">
+<li>VAR Model for Home Value (Saving Rate + GDP Deflator + Sale Price)</li>
+</ol>
+<p>A VAR model is very suitable for understanding the interactions as a whole. It allows for the assessment of how each variable influences and is influenced by the others over time, crucial in real estate economics.</p>
 <div class="cell">
 
 </div>
@@ -1111,6 +1135,7 @@ Training set 0.001944753</code></pre>
 <p><img src="ASV_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Based on the forecast, we can see that the model did capture the seasonal contents where it predict the downfall of the data.</p>
 </section>
 </section>
 <section id="arimax-saving-rate-household-income-household-saving" class="level1">
@@ -1923,6 +1948,7 @@ Training set 0.001944753</code></pre>
 <p><img src="ASV_files/figure-html/unnamed-chunk-48-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Based on the forecast, we can see that the model did capture the seasonal patterns where it predict the fluctuations and downfall of the data in the future.</p>
 </section>
 </section>
 <section id="var-sale-price-saving-rate-gdp-deflator" class="level1">
@@ -2780,6 +2806,7 @@ date             0.02219    -0.007004  1.000000</code></pre>
 <p><img src="ASV_files/figure-html/unnamed-chunk-71-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Based on the forecast, we can see that the model has help us forecast for each variable, for gdp deflator, and sale price, and saving rate, due to the model lacks of seasonal patterns, it did not capture the fluctuations very will. However, the forecast did capture the overall trends correctly.</p>
 </section>
 </section>
 <section id="arimax-gini-index-household-income-household-saving-sale-price" class="level1">
@@ -5396,12 +5423,9 @@ date          0.0306      -0.1267  0.04516  1.00000</code></pre>
 <p><img src="ASV_files/figure-html/unnamed-chunk-123-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-</section>
-</section>
-<section id="section" class="level1">
-<h1></h1>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

@@ -30,8 +30,36 @@ Discription:
 
 # Literatue Review to choose variables and models
 
+The key of my project big picture is to identify the impacts and correlations among Incomes and Housing Prices. Therefore, houseing prices such as home values, sale prices, and rental prices are very crucial to utilize models. Different aspects of the feature will be included such as the housing prices, incomes, gdp, gini index to check the affordability. By using the datasets and factors, we can evaluate the correlations and impacts among them to better help us understand the effect and gain insights about the disparities and inbalance of the wealth. In addition, it can also help us to make predictions for the future such that we can act now to solve the potential global issues. 
+
+Therefore, my models would be:
+
+1. ARIMAX Model for Home Value ~ Sale Price + Rental Price
+   
+The reason is that I think that Sale and rental prices are directly linked to home values. The sale price is an immediate indicator of market valuation, while rental prices reflect ongoing demand and income potential from properties. I expect a strong correlation between these variables and home value. By utilizing the ARIMAX Model, it can help me capture both the time series nature of housing data and the sale and rental prices to get a better understanding of the situation.
+
+Then, the first model focus on the Housing Prices, the second model will focus on the income parts. The goal of my project is to find correlations and impacts among these features. Therefore, in this case, for personal income, saving rate and household savings are important factors that I should include in my analsyis.
+
+2. ARIMAX Model for Saving Rate ~ Household Income + Household Saving
+   
+The reason for chooing these three variables is that Household income and savings are fundamental determinants of the saving rate. Increased income typically leads to higher saving rates. Household savings directly contribute to the overall saving rate. And with more savings, there are more chances to look for a new home or look for a higher home prices. Which can also be connected to me first model.
+
+Then, I must also evaluate the economic as a whole. Tehrefore, gdp deflator would be a good choice. By using, gdp, sale price, and saving rate, I combine the bigger effect of economic, individual aspect, and the market sale price together to evaluate the correlations and impacts.
+
+3. VAR Model for Sale Price, Saving Rate, GDP Deflator
+   
+I choose (VAR) model because I think that it is suitable for multivariate time series data where variables are interdependent. Since I want to look for connections among these three features, VAR allows for the examination of how a variable is affected by its own lagged values and the lagged values of others, crucial in studying economic systems.
 
 
+4. ARIMAX Model for GINI Index (Household Income + Household Saving + Sale Price)
+   
+Then, I decide to use the GINI index as my fourth major objective in ARIMAX model. It is a measure of income inequality, which also be affected by household income, savings, and property values. Higher income and savings typically indicate more wealth but there are many people that do not have high wealth which make the inequality. The sale price of homes can reflect wealth disparities as well. Therefore, the usage of the three variables and ARIMAX model can help capturing both the influences of these specific among each other and the time series nature of the GINI index. This model helps understand how current and past economic conditions impact income inequality.
+
+Finally, I plan to use var model on home value, saving rate, gdp deflator, and sale price. The reason: Home values are also influenced by overall economic conditions, represented by the GDP deflator, and directly by the housing market dynamics, represented by sale prices. And by adding the saving rate, we can see that what are the total impacts of these varaibles as a whole. 
+
+5. VAR Model for Home Value (Saving Rate + GDP Deflator + Sale Price)
+   
+A VAR model is very suitable for understanding the interactions as a whole. It allows for the assessment of how each variable influences and is influenced by the others over time, crucial in real estate economics.
 
 
 
@@ -363,6 +391,7 @@ autoplot(fcast, main="Forecast of Home Values") + xlab("Year") +
 ```
 
 
+Based on the forecast, we can see that the model did capture the seasonal contents where it predict the downfall of the data.
 
 
 
@@ -666,6 +695,7 @@ autoplot(fcast, main="Forecast of Saving Rate") + xlab("Year") +
   ylab("Saving Rate")
 ```
 
+Based on the forecast, we can see that the model did capture the seasonal patterns where it predict the fluctuations and downfall of the data in the future.
 
 
 
@@ -1042,6 +1072,8 @@ forecast(fit1,48) %>%
   autoplot() + xlab("Year")
 ```
 
+Based on the forecast, we can see that the model has help us forecast for each variable, for gdp deflator, and sale price, and saving rate, due to the model lacks of 
+seasonal patterns, it did not capture the fluctuations very will. However, the forecast did capture the overall trends correctly.
 
 
 # 4. (ARIMAX) GINI Index ~ Household Income + Household Saving + Sale Price
