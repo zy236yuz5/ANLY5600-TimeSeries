@@ -1,0 +1,444 @@
+---
+title: "datavis"
+author: "Zonghong Yu"
+date: "2023-09-18"
+output: html_document
+---
+
+
+
+```{r}
+library(reticulate)
+library(ggplot2)
+library(forecast)
+library(astsa) 
+library(gridExtra)
+library(xts)
+library(tseries)
+library(fpp2)
+library(fma)
+library(lubridate)
+library(tidyverse)
+library(TSstudio)
+library(quantmod)
+library(tidyquant)
+library(plotly)
+library(ggplot2)
+library(lubridate)
+library(plotly)
+library(TTR) # For the SMA function
+
+```
+
+
+```{r, echo=FALSE, results='hide',warning=FALSE,message=FALSE}
+df1 <- read.csv("../../Dataset/project/household_saving.csv")
+df2 <- read.csv("../../Dataset/project/MEHOINUSA672N.csv")
+df3 <- read.csv("../../Dataset/project/MSPUS.csv")
+df4 <- read.csv("../../Dataset/project/SIPOVGINIUSA.csv")
+df5 <- read.csv("../../Dataset/project/FIXHAI.csv")
+df6 <- read.csv("../../Dataset/project/PSAVERT.csv")
+df7 <- read.csv("../../Dataset/project/A191RI1Q225SBEA.csv")
+df8 <- read.csv("../../Dataset/project/Merged_downsample.csv")
+
+df1$DATE <- as.Date(df1$DATE)
+df2$DATE <- as.Date(df2$DATE)
+df3$DATE <- as.Date(df3$DATE)
+df4$DATE <- as.Date(df4$DATE)
+df5$DATE <- as.Date(df5$DATE)
+df6$DATE <- as.Date(df6$DATE)
+df7$DATE <- as.Date(df7$DATE)
+df8$date <- as.Date(df8$date)
+head(df8)
+```
+
+
+Income Stock Analsyis with Verizon
+
+Literuature Review:
+Since my big picture and goal is to evaluate the correlation between Home values, prices and income to see the impact among them. Therefore, an income stock would be effective for me to get my result.
+Wireless subscribers of telecommunications titan Verizon Communications (VZ 1.38%) provide a reliable base of revenue and cash flow. Verizon generated an impressive $12.4 billion of free cash flow through the first nine months of 2022, giving it the funds to reward its shareholders with $8.1 billion in dividends.
+
+Verizon's shares offer a hefty dividend yield (it was more than 6% in late 2022). The telecom giant has also increased its dividend for 16 straight years, the longest current streak in the U.S. telecom sector. That attractive and growing income stream makes Verizon a great stock for earning passive income.
+
+
+# Calculate the Returns
+
+```{r}
+library('quantmod')
+# gather stock price data from Yahoo Finance and focus on Disney’s adjusted stock prices starting from 2016
+
+getSymbols("VZ", from="2016-01-01", src="yahoo")
+
+```
+
+
+
+```{r}
+# Calculate the logarithmic returns
+VZ$VZ.Log.Returns <- c(diff(log(VZ$VZ.Close)))
+VZ <- na.omit(VZ)
+```
+
+```{r}
+head(VZ)
+```
+
+```{r}
+x <- list(
+  title = "date"
+)
+y <- list(
+  title = "value"
+)
+
+stock <- data.frame(VZ$VZ.Log.Returns)
+
+
+stock <- data.frame(stock,rownames(stock))
+colnames(stock) <- append('Income Stock Returns','date')   # USE Adjusted price as required
+head(stock)
+```
+
+```{r}
+stock$date<-as.Date(stock$date,"%Y-%m-%d")
+fig <- plot_ly(stock, x = ~date, y = ~`Income Stock Returns`, name = 'Income Stock Returns From 2016', type = 'scatter', mode = 'lines') %>%
+  
+  layout(
+    title = "Income Stock Returns  From 2016",
+    paper_bgcolor = '#E0E0E0', # Set the background color 
+    plot_bgcolor = '#E0E0E0', # Set the background color 
+    xaxis = list(title = "Date"),
+    yaxis = list(title = "Stock returns")
+  )
+
+fig
+```
+
+```{r}
+htmlwidgets::saveWidget(fig, "../../image/GARCH/income_stock_returns.html")
+```
+
+## Stationarity
+The plot shows no particular trend. This indicates that the series is likely stationary because the mean of the series could be constant or not changing too much over time. 
+
+## Volatility
+The series seems to exhibit periods of different volatility levels within expectations. However, overall, it is pretty steady throughout the time. There are some fluctuations, but the variations appear relatively stable and small. 
+
+Volatility in financial time series is often clustered; periods of high volatility are followed by periods of high volatility, and periods of low volatility are followed by periods of low volatility. This plot suggests such clustering might be present.
+
+```{r}
+head(stock)
+```
+
+
+## Prepare to fit the model and check acf and pacf
+
+```{r}
+returns = ts(stock$`Income Stock Returns`)
+acf_plot <- ggAcf(returns) +
+  labs(title = "ACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(returns) +
+  labs(title = "PACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(acf_plot, pacf_plot, ncol = 1)             
+
+```
+
+```{r}
+returns = ts(stock$`Income Stock Returns`)
+ggAcf(returns,40)
+ggPacf(returns,40)
+```
+
+We can see that the plots for the returns are weakly stationary.
+
+## ACF of absolute values of the returns 
+
+```{r}
+
+acf_plot <- ggAcf(abs(returns)) +
+  labs(title = "ACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(abs(returns)) +
+  labs(title = "PACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(acf_plot, pacf_plot, ncol = 1)             
+
+```
+
+## ACF for squared values
+
+```{r}
+acf_plot <- ggAcf(returns^2) +
+  labs(title = "ACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(returns^2) +
+  labs(title = "PACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(acf_plot, pacf_plot, ncol = 1)             
+
+```
+
+
+Based on the acf and pacf, we can see that the returns are weakly stationary.
+
+```{r}
+library(tseries)
+adf.test(returns)
+```
+
+WE can see that there are little correlations left. The returns are stationary.
+
+
+##  Fit an appropriate AR+ARCH/ARMA+GARCH or ARIMA-ARCH/GARCH
+
+
+### First, determine the ARIMA model using model diagnostic
+
+```{r}
+# Reference from the lab 6 part 1 demo:
+temp.ts = returns
+d=0
+i=1
+temp= data.frame()
+ls=matrix(rep(NA,6*71),nrow=71)
+
+for (p in 1:5)
+{
+  for(q in 1:5)
+  {
+    for(d in 0:2)#
+    {
+      
+      if(p-1+d+q-1<=8)
+      {
+        
+        model<- Arima(temp.ts,order=c(p-1,d,q-1),include.drift=FALSE) 
+        ls[i,]= c(p-1,d,q-1,model$aic,model$bic,model$aicc)
+        i=i+1
+        #print(i)
+        
+      }
+      
+    }
+  }
+}
+
+temp= as.data.frame(ls)
+names(temp)= c("p","d","q","AIC","BIC","AICc")
+
+knitr::kable(temp)
+```
+## Evaluations using AIC, BIC, and AICc
+
+```{r}
+temp[which.min(temp$AIC),]
+temp[which.min(temp$BIC),]
+temp[which.min(temp$AICc),]
+```
+
+We can see that  for (4,0,4) has the lowest AIC and AICc. For (0,0,0), it has the lowest BIC.
+Therefore we should compare them.
+
+## Compare ARIMA Models for (4,0,4) and ARIMA (0,0,0)
+```{r,warning=FALSE}
+set.seed(236)
+
+model_output21 <- capture.output(sarima(returns, 4,0,4)) 
+model_output22 <- capture.output(sarima(returns, 0,0,0)) 
+```
+
+```{r}
+cat(model_output21[160:200], model_output21[length(model_output21)], sep = "\n")
+```
+
+```{r}
+
+cat(model_output22[20:38], model_output22[length(model_output22)], sep = "\n")
+```
+
+Based on the model comparsion and diagnostic, I think that ARIMA Models for (4,0,4) is better with smaller evaluation matrices and it is more suitable and proper based on acf and pacf plots. In addition, the acf of residule is also more stationary.
+
+## Fit the best one ARIMA(4,0,4)
+
+```{r,warning=FALSE}
+fit2 <- arima(temp.ts, order = c(4,0,4))
+summary(fit2)
+```
+## get the residuals of the arima model
+```{r}
+arima.res <- residuals(fit2)
+
+acf_plot <- ggAcf(arima.res) +
+  labs(title = "ACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(arima.res) +
+  labs(title = "PACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(acf_plot, pacf_plot, ncol = 1)   
+
+```
+
+
+We can see that mostly, the residual is stationary however the residuals of ARIMA model indicates some flutucations. 
+In this case, I think that we can try to fit an ARCH/GARCH model.
+
+Therefore, I think we can further making analysis by adding GARCH models to see if we should use it.
+
+## Model Diagnostics For ARCH/GARCH model 
+
+### Acf and pacf for squared residuals
+```{r}
+arima.res <- residuals(fit2)
+
+acf_plot <- ggAcf(arima.res^2) +
+  labs(title = "ACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+pacf_plot <- ggPacf(arima.res^2) +
+  labs(title = "PACF for data") +
+  theme(
+    panel.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0"),
+    plot.background = element_rect(fill = "#E0E0E0", color = "#E0E0E0")
+  )
+
+# Combine the plots
+grid.arrange(acf_plot, pacf_plot, ncol = 1)   
+
+```
+
+We can see that it is not yet stationary for squared residuals. GARCH model can be applied.
+
+However, no matter what, I still think that I should make a further diagnostic and compare the results.
+
+```{r}
+mean_res <- mean(arima.res, na.rm = TRUE)
+sd_res <- sd(arima.res, na.rm = TRUE)
+
+# Normalize the residuals
+arima.res <- (arima.res - mean_res) / sd_res
+
+model <- list() ## set counter
+cc <- 1
+for (p in 1:7) {
+  for (q in 1:7) {
+  
+model[[cc]] <- garch(arima.res,order=c(q,p),trace=F)
+cc <- cc + 1
+}
+} 
+
+## get AIC values for model evaluation
+GARCH_AIC <- sapply(model, AIC) ## model with lowest AIC is the best
+```
+
+```{r}
+which(GARCH_AIC == min(GARCH_AIC))
+model[[which(GARCH_AIC == min(GARCH_AIC))]]
+```
+
+From here, I think that garch(5,6) is a good choice
+
+```{r,warning=FALSE}
+library(fGarch)
+summary(garchFit(~garch(5,6), arima.res,trace = F)) 
+```
+
+The results shows that (5,6) is not an optimal fit. The coefficients are not significant.
+
+Therefore, let us try (1,4)
+
+## Try to compare with Garch(1,1),Garch(1,2)
+```{r}
+summary(garchFit(~garch(1,1), arima.res,trace = F)) 
+summary(garchFit(~garch(1,2), arima.res,trace = F)) 
+
+```
+
+Now, it seems that the GARCH(1,2) is better with more siginificant components.
+
+
+## Final Model: ARIMA (4,0,4) + GARCH(1,2)
+
+### Forecast
+
+
+
+
+### ARIMA (0,2,3) + Garch(1,0)
+```{r}
+final.fit <- garchFit(~garch(1,2), arima.res,trace = F)
+predict(final.fit, n.ahead = 365, plot=TRUE)
+```
+We can see that the model captures the relatively constant variation with the confidence intervals fitted in the range. This means that the model combination is effective to predict the future values. The overall interpretation and prediction on the historical dataset is reasonable.
+
+### Box Ljung Test
+```{r}
+box_ljung_test <- Box.test(arima.res, lag = 10, type = "Ljung-Box")
+
+# Display the test results
+box_ljung_test
+```
+
+The Box Ljung yields the simiarl results of my model choosing. The p-value is above a significance level 0.05, therefore, I do not reject the null hypothesis. This suggests that the residuals do not exhibit autocorrelation and that the model is adequate. This conclusion alignes that my models choosing capture the dataset and make predictions well.
+
+### The Equation
+
+
+The ARIMA (0,2,3) + Garch(1,0) model is defined as:
+The combined ARIMA(0,2,3) + GARCH(1,0) model is defined as:
+
+The ARIMA(0,2,3) + GARCH(1,0) model is defined as:
+
+\[
+\begin{align*}
+(1 - B)^2 X_t &= \theta_1 \varepsilon_{t-1} + \theta_2 \varepsilon_{t-2} + \theta_3 \varepsilon_{t-3} + \varepsilon_t, \\
+\text{where } \varepsilon_t &\sim N(0, \sigma_t^2), \\
+\sigma_t^2 &= \alpha_0 + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2.
+\end{align*}
+\]
+
+Here:
+- \( (1 - B)^2 X_t \) represents the second difference of the time series \( X_t \).
+- \( \theta_1, \theta_2, \theta_3 \) are the parameters of the moving average (MA) component.
+- \( \varepsilon_t \) is the white noise error term at time \( t \).
+- \( \sigma_t^2 \) is the conditional variance at time \( t \).
+- \( \alpha_0, \alpha_1 \) are the coefficients of the GARCH model's variance equation.
+- \( \beta_1 \) is the coefficient for the lagged conditional variance.
+

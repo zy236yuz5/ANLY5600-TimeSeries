@@ -67,6 +67,8 @@ homevalue =ts(df8$Mean.Home.Value)
 rentalprice =ts(df8$mean)
 ```
 
+
+
 ```{r}
 # Define start and end dates
 start_date <- as.Date("1992-01-01")
