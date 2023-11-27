@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  title: "Time Series          sfdsasdasd"
+  title: "Time Series"
   navbar:
     left:
       
