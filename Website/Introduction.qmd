@@ -10,7 +10,7 @@ navbar:
       - EDA.qmd
       - ARModels.qmd
       - ASV.qmd
-      - SAF.qmd
+   
       - GARCH.qmd
       - TS.qmd
       - conclusion.qmd

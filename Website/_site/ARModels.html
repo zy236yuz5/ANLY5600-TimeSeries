@@ -172,10 +172,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
  <span class="menu-text">ARIMAX/SARIMAX/VAR</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./SAF.html">
- <span class="menu-text">Spectral Analysis and Filtering</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="./GARCH.html">
  <span class="menu-text">Financial Time Series Models (ARCH/GARCH)</span></a>
   </li>  
@@ -202,7 +198,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#armaarima-analysis" id="toc-armaarima-analysis" class="nav-link active" data-scroll-target="#armaarima-analysis">ARMA/ARIMA Analysis</a>
+  <li><a href="#armaarima-analysis-with-covid-19-impacts" id="toc-armaarima-analysis-with-covid-19-impacts" class="nav-link active" data-scroll-target="#armaarima-analysis-with-covid-19-impacts">ARMA/ARIMA Analysis (With Covid-19 Impacts)</a>
   <ul class="collapse">
   <li><a href="#the-household-saving-data-analysis" id="toc-the-household-saving-data-analysis" class="nav-link" data-scroll-target="#the-household-saving-data-analysis">The Household Saving Data Analysis</a>
   <ul class="collapse">
@@ -235,7 +231,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#benchmark-1" id="toc-benchmark-1" class="nav-link" data-scroll-target="#benchmark-1">BENCHMARK</a></li>
   </ul></li>
   </ul></li>
-  <li><a href="#sarima-analysis" id="toc-sarima-analysis" class="nav-link" data-scroll-target="#sarima-analysis">SARIMA Analysis</a>
+  <li><a href="#sarima-analysis-before-covid-19" id="toc-sarima-analysis-before-covid-19" class="nav-link" data-scroll-target="#sarima-analysis-before-covid-19">SARIMA Analysis　(Before Covid-19)</a>
   <ul class="collapse">
   <li><a href="#gdp-deflator-sarima-analysis" id="toc-gdp-deflator-sarima-analysis" class="nav-link" data-scroll-target="#gdp-deflator-sarima-analysis">GDP Deflator SARIMA Analysis</a>
   <ul class="collapse">
@@ -322,8 +318,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><strong>Equation</strong>: The SARIMA model combines both non-seasonal and seasonal components. Once both seasonal and non-seasonal differencing are applied (if needed), the SARIMA equation becomes an extension of the ARMA equation but with additional seasonal terms. [ X_t = c + <em>1X</em>{t-1} + + <em>pX</em>{t-p} + <em>1a</em>{t-1} + + <em>qa</em>{t-q} + <em>1X</em>{t-P} + + <em>PX</em>{t-PS} + <em>1a</em>{t-Q} + + <em>Qa</em>{t-QS} + a_t ] where ( S ) represents the seasonal period and ( a_t ) is white noise.</li>
 </ul></li>
 </ol>
-<section id="armaarima-analysis" class="level1">
-<h1>ARMA/ARIMA Analysis</h1>
+<section id="armaarima-analysis-with-covid-19-impacts" class="level1">
+<h1>ARMA/ARIMA Analysis (With Covid-19 Impacts)</h1>
 <section id="the-household-saving-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="the-household-saving-data-analysis">The Household Saving Data Analysis</h2>
 <p>Due to the differencing methods should be used when the dataset is not stationary. Here, as in EDA section, the household income data analysis provides results that this dataset is not stationary. To have a brief recap, I have provided the orginal dataset and the acf and pacf plots.</p>
@@ -1393,8 +1389,8 @@ Training set 0.0208634</code></pre>
 </section>
 </section>
 </section>
-<section id="sarima-analysis" class="level1">
-<h1>SARIMA Analysis</h1>
+<section id="sarima-analysis-before-covid-19" class="level1">
+<h1>SARIMA Analysis　(Before Covid-19)</h1>
 <section id="gdp-deflator-sarima-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="gdp-deflator-sarima-analysis">GDP Deflator SARIMA Analysis</h2>
 <div class="cell">

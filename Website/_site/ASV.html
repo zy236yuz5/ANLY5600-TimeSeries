@@ -172,10 +172,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
  <span class="menu-text">ARIMAX/SARIMAX/VAR</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./SAF.html">
- <span class="menu-text">Spectral Analysis and Filtering</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="./GARCH.html">
  <span class="menu-text">Financial Time Series Models (ARCH/GARCH)</span></a>
   </li>  
@@ -203,7 +199,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
    
   <ul>
   <li><a href="#literatue-review-to-choose-variables-and-models" id="toc-literatue-review-to-choose-variables-and-models" class="nav-link active" data-scroll-target="#literatue-review-to-choose-variables-and-models">Literatue Review to choose variables and models</a></li>
-  <li><a href="#arimax-home-value-sale-price-rental-price" id="toc-arimax-home-value-sale-price-rental-price" class="nav-link" data-scroll-target="#arimax-home-value-sale-price-rental-price">1. (ARIMAX) Home value ~ Sale price + Rental price</a>
+  <li><a href="#arimax-home-value-sale-price-rental-price-with-covid" id="toc-arimax-home-value-sale-price-rental-price-with-covid" class="nav-link" data-scroll-target="#arimax-home-value-sale-price-rental-price-with-covid">1. (ARIMAX) Home value ~ Sale price + Rental price (With Covid)</a>
   <ul class="collapse">
   <li><a href="#set-up-the-variables" id="toc-set-up-the-variables" class="nav-link" data-scroll-target="#set-up-the-variables">Set Up The Variables</a></li>
   <li><a href="#auto-fit-the-model" id="toc-auto-fit-the-model" class="nav-link" data-scroll-target="#auto-fit-the-model">Auto Fit The Model</a></li>
@@ -218,7 +214,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#write-down-the-equation" id="toc-write-down-the-equation" class="nav-link" data-scroll-target="#write-down-the-equation">Write Down The equation:</a></li>
   <li><a href="#forecasting" id="toc-forecasting" class="nav-link" data-scroll-target="#forecasting">Forecasting</a></li>
   </ul></li>
-  <li><a href="#arimax-saving-rate-household-income-household-saving" id="toc-arimax-saving-rate-household-income-household-saving" class="nav-link" data-scroll-target="#arimax-saving-rate-household-income-household-saving">2. (ARIMAX) Saving Rate ~ Household Income + Household Saving</a>
+  <li><a href="#arimax-saving-rate-household-income-household-saving-before-covid" id="toc-arimax-saving-rate-household-income-household-saving-before-covid" class="nav-link" data-scroll-target="#arimax-saving-rate-household-income-household-saving-before-covid">2. (ARIMAX) Saving Rate ~ Household Income + Household Saving (Before Covid)</a>
   <ul class="collapse">
   <li><a href="#creating-ts-objects-for-variables" id="toc-creating-ts-objects-for-variables" class="nav-link" data-scroll-target="#creating-ts-objects-for-variables">Creating Ts Objects For Variables</a></li>
   <li><a href="#combine-the-varaibles" id="toc-combine-the-varaibles" class="nav-link" data-scroll-target="#combine-the-varaibles">Combine the Varaibles</a></li>
@@ -236,7 +232,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#write-doen-the-equation" id="toc-write-doen-the-equation" class="nav-link" data-scroll-target="#write-doen-the-equation">Write Doen The equation:</a></li>
   <li><a href="#forecasting-1" id="toc-forecasting-1" class="nav-link" data-scroll-target="#forecasting-1">Forecasting</a></li>
   </ul></li>
-  <li><a href="#var-sale-price-saving-rate-gdp-deflator" id="toc-var-sale-price-saving-rate-gdp-deflator" class="nav-link" data-scroll-target="#var-sale-price-saving-rate-gdp-deflator">3. (VAR) Sale Price &amp; Saving Rate &amp; Gdp Deflator</a>
+  <li><a href="#var-sale-price-saving-rate-gdp-deflator-before-covid" id="toc-var-sale-price-saving-rate-gdp-deflator-before-covid" class="nav-link" data-scroll-target="#var-sale-price-saving-rate-gdp-deflator-before-covid">3. (VAR) Sale Price &amp; Saving Rate &amp; Gdp Deflator (Before Covid)</a>
   <ul class="collapse">
   <li><a href="#transform-all-to-time-series" id="toc-transform-all-to-time-series" class="nav-link" data-scroll-target="#transform-all-to-time-series">Transform all to time series</a></li>
   <li><a href="#prepare-variables-saving-rate-sale-price-gdp-deflator" id="toc-prepare-variables-saving-rate-sale-price-gdp-deflator" class="nav-link" data-scroll-target="#prepare-variables-saving-rate-sale-price-gdp-deflator">Prepare Variables: saving rate, sale price, gdp deflator</a></li>
@@ -257,7 +253,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#forecast-results" id="toc-forecast-results" class="nav-link" data-scroll-target="#forecast-results">Forecast Results</a></li>
   </ul></li>
-  <li><a href="#arimax-gini-index-household-income-household-saving-sale-price" id="toc-arimax-gini-index-household-income-household-saving-sale-price" class="nav-link" data-scroll-target="#arimax-gini-index-household-income-household-saving-sale-price">4. (ARIMAX) GINI Index ~ Household Income + Household Saving + Sale Price</a>
+  <li><a href="#arimax-gini-index-household-income-household-saving-sale-price-before-covid" id="toc-arimax-gini-index-household-income-household-saving-sale-price-before-covid" class="nav-link" data-scroll-target="#arimax-gini-index-household-income-household-saving-sale-price-before-covid">4. (ARIMAX) GINI Index ~ Household Income + Household Saving + Sale Price (Before Covid)</a>
   <ul class="collapse">
   <li><a href="#prepare-the-variables" id="toc-prepare-the-variables" class="nav-link" data-scroll-target="#prepare-the-variables">Prepare the Variables</a></li>
   <li><a href="#combine-the-variables" id="toc-combine-the-variables" class="nav-link" data-scroll-target="#combine-the-variables">Combine the Variables</a></li>
@@ -273,7 +269,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#fit-the-model-1" id="toc-fit-the-model-1" class="nav-link" data-scroll-target="#fit-the-model-1">Fit the model</a></li>
   <li><a href="#forecast" id="toc-forecast" class="nav-link" data-scroll-target="#forecast">Forecast</a></li>
   </ul></li>
-  <li><a href="#var-home-value-saving-rate-gdp-deflator-sale-price" id="toc-var-home-value-saving-rate-gdp-deflator-sale-price" class="nav-link" data-scroll-target="#var-home-value-saving-rate-gdp-deflator-sale-price">5. (VAR) Home Value ~ Saving Rate + Gdp Deflator + Sale Price</a>
+  <li><a href="#var-home-value-saving-rate-gdp-deflator-sale-price-before-covid" id="toc-var-home-value-saving-rate-gdp-deflator-sale-price-before-covid" class="nav-link" data-scroll-target="#var-home-value-saving-rate-gdp-deflator-sale-price-before-covid">5. (VAR) Home Value ~ Saving Rate + Gdp Deflator + Sale Price (Before Covid)</a>
   <ul class="collapse">
   <li><a href="#time-series-transformation" id="toc-time-series-transformation" class="nav-link" data-scroll-target="#time-series-transformation">Time Series Transformation</a></li>
   <li><a href="#select-the-variables-with-common-dates" id="toc-select-the-variables-with-common-dates" class="nav-link" data-scroll-target="#select-the-variables-with-common-dates">Select the Variables with common Dates</a></li>
@@ -318,26 +314,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>The key of my project big picture is to identify the impacts and correlations among Incomes and Housing Prices. Therefore, houseing prices such as home values, sale prices, and rental prices are very crucial to utilize models. Different aspects of the feature will be included such as the housing prices, incomes, gdp, gini index to check the affordability. By using the datasets and factors, we can evaluate the correlations and impacts among them to better help us understand the effect and gain insights about the disparities and inbalance of the wealth. In addition, it can also help us to make predictions for the future such that we can act now to solve the potential global issues.</p>
 <p>Therefore, my models would be:</p>
 <ol type="1">
-<li>ARIMAX Model for Home Value ~ Sale Price + Rental Price</li>
+<li>ARIMAX Model for Home Value ~ Sale Price + Rental Price (With Covid)</li>
 </ol>
 <p>The reason is that I think that Sale and rental prices are directly linked to home values. The sale price is an immediate indicator of market valuation, while rental prices reflect ongoing demand and income potential from properties. I expect a strong correlation between these variables and home value. By utilizing the ARIMAX Model, it can help me capture both the time series nature of housing data and the sale and rental prices to get a better understanding of the situation.</p>
 <p>Then, the first model focus on the Housing Prices, the second model will focus on the income parts. The goal of my project is to find correlations and impacts among these features. Therefore, in this case, for personal income, saving rate and household savings are important factors that I should include in my analsyis.</p>
 <ol start="2" type="1">
-<li>ARIMAX Model for Saving Rate ~ Household Income + Household Saving</li>
+<li>ARIMAX Model for Saving Rate ~ Household Income + Household Saving (Before Covid)</li>
 </ol>
 <p>The reason for chooing these three variables is that Household income and savings are fundamental determinants of the saving rate. Increased income typically leads to higher saving rates. Household savings directly contribute to the overall saving rate. And with more savings, there are more chances to look for a new home or look for a higher home prices. Which can also be connected to me first model.</p>
 <p>Then, I must also evaluate the economic as a whole. Tehrefore, gdp deflator would be a good choice. By using, gdp, sale price, and saving rate, I combine the bigger effect of economic, individual aspect, and the market sale price together to evaluate the correlations and impacts.</p>
 <ol start="3" type="1">
-<li>VAR Model for Sale Price, Saving Rate, GDP Deflator</li>
+<li>VAR Model for Sale Price, Saving Rate, GDP Deflator (Before Covid)</li>
 </ol>
 <p>I choose (VAR) model because I think that it is suitable for multivariate time series data where variables are interdependent. Since I want to look for connections among these three features, VAR allows for the examination of how a variable is affected by its own lagged values and the lagged values of others, crucial in studying economic systems.</p>
 <ol start="4" type="1">
-<li>ARIMAX Model for GINI Index (Household Income + Household Saving + Sale Price)</li>
+<li>ARIMAX Model for GINI Index (Household Income + Household Saving + Sale Price) (Before Covid)</li>
 </ol>
 <p>Then, I decide to use the GINI index as my fourth major objective in ARIMAX model. It is a measure of income inequality, which also be affected by household income, savings, and property values. Higher income and savings typically indicate more wealth but there are many people that do not have high wealth which make the inequality. The sale price of homes can reflect wealth disparities as well. Therefore, the usage of the three variables and ARIMAX model can help capturing both the influences of these specific among each other and the time series nature of the GINI index. This model helps understand how current and past economic conditions impact income inequality.</p>
 <p>Finally, I plan to use var model on home value, saving rate, gdp deflator, and sale price. The reason: Home values are also influenced by overall economic conditions, represented by the GDP deflator, and directly by the housing market dynamics, represented by sale prices. And by adding the saving rate, we can see that what are the total impacts of these varaibles as a whole.</p>
 <ol start="5" type="1">
-<li>VAR Model for Home Value (Saving Rate + GDP Deflator + Sale Price)</li>
+<li>VAR Model for Home Value (Saving Rate + GDP Deflator + Sale Price) (Before Covid)</li>
 </ol>
 <p>A VAR model is very suitable for understanding the interactions as a whole. It allows for the assessment of how each variable influences and is influenced by the others over time, crucial in real estate economics.</p>
 <div class="cell">
@@ -362,8 +358,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </details>
 </div>
 </section>
-<section id="arimax-home-value-sale-price-rental-price" class="level1">
-<h1>1. (ARIMAX) Home value ~ Sale price + Rental price</h1>
+<section id="arimax-home-value-sale-price-rental-price-with-covid" class="level1">
+<h1>1. (ARIMAX) Home value ~ Sale price + Rental price (With Covid)</h1>
 <section id="set-up-the-variables" class="level2">
 <h2 class="anchored" data-anchor-id="set-up-the-variables">Set Up The Variables</h2>
 <div class="cell">
@@ -1138,8 +1134,8 @@ Training set 0.001944753</code></pre>
 <p>Based on the forecast, we can see that the model did capture the seasonal contents where it predict the downfall of the data.</p>
 </section>
 </section>
-<section id="arimax-saving-rate-household-income-household-saving" class="level1">
-<h1>2. (ARIMAX) Saving Rate ~ Household Income + Household Saving</h1>
+<section id="arimax-saving-rate-household-income-household-saving-before-covid" class="level1">
+<h1>2. (ARIMAX) Saving Rate ~ Household Income + Household Saving (Before Covid)</h1>
 <section id="creating-ts-objects-for-variables" class="level2">
 <h2 class="anchored" data-anchor-id="creating-ts-objects-for-variables">Creating Ts Objects For Variables</h2>
 <div class="cell">
@@ -1951,8 +1947,8 @@ Training set 0.001944753</code></pre>
 <p>Based on the forecast, we can see that the model did capture the seasonal patterns where it predict the fluctuations and downfall of the data in the future.</p>
 </section>
 </section>
-<section id="var-sale-price-saving-rate-gdp-deflator" class="level1">
-<h1>3. (VAR) Sale Price &amp; Saving Rate &amp; Gdp Deflator</h1>
+<section id="var-sale-price-saving-rate-gdp-deflator-before-covid" class="level1">
+<h1>3. (VAR) Sale Price &amp; Saving Rate &amp; Gdp Deflator (Before Covid)</h1>
 <section id="transform-all-to-time-series" class="level2">
 <h2 class="anchored" data-anchor-id="transform-all-to-time-series">Transform all to time series</h2>
 <div class="cell">
@@ -2809,8 +2805,8 @@ date             0.02219    -0.007004  1.000000</code></pre>
 <p>Based on the forecast, we can see that the model has help us forecast for each variable, for gdp deflator, and sale price, and saving rate, due to the model lacks of seasonal patterns, it did not capture the fluctuations very will. However, the forecast did capture the overall trends correctly.</p>
 </section>
 </section>
-<section id="arimax-gini-index-household-income-household-saving-sale-price" class="level1">
-<h1>4. (ARIMAX) GINI Index ~ Household Income + Household Saving + Sale Price</h1>
+<section id="arimax-gini-index-household-income-household-saving-sale-price-before-covid" class="level1">
+<h1>4. (ARIMAX) GINI Index ~ Household Income + Household Saving + Sale Price (Before Covid)</h1>
 <section id="prepare-the-variables" class="level2">
 <h2 class="anchored" data-anchor-id="prepare-the-variables">Prepare the Variables</h2>
 <div class="cell">
@@ -4040,8 +4036,8 @@ Training set -0.04495977</code></pre>
 </div>
 </section>
 </section>
-<section id="var-home-value-saving-rate-gdp-deflator-sale-price" class="level1">
-<h1>5. (VAR) Home Value ~ Saving Rate + Gdp Deflator + Sale Price</h1>
+<section id="var-home-value-saving-rate-gdp-deflator-sale-price-before-covid" class="level1">
+<h1>5. (VAR) Home Value ~ Saving Rate + Gdp Deflator + Sale Price (Before Covid)</h1>
 <section id="time-series-transformation" class="level2">
 <h2 class="anchored" data-anchor-id="time-series-transformation">Time Series Transformation</h2>
 <div class="cell">

@@ -11,7 +11,7 @@ navbar:
       - EDA.qmd
       - ARModels.qmd
       - ASV.qmd
-      - SAF.qmd
+    
       - GARCH.qmd
       - TS.qmd
       - conclusion.qmd
@@ -70,7 +70,7 @@ Certainly! Here's a brief overview of the ARMA, ARIMA, and SARIMA models with th
      where \( S \) represents the seasonal period and \( a_t \) is white noise.
 
 
-# ARMA/ARIMA Analysis
+# ARMA/ARIMA Analysis (With Covid-19 Impacts)
 
 ## The Household Saving Data Analysis
 
@@ -1100,7 +1100,7 @@ Based on the plot, we can see that Our fit is better than the benchmark methods 
 
 
 
-# SARIMA Analysis
+# SARIMA Analysis　(Before Covid-19)
 
 ## GDP Deflator SARIMA Analysis
 
