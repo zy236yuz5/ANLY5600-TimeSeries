@@ -11,7 +11,6 @@ navbar:
       - EDA.qmd
       - ARModels.qmd
       - ASV.qmd
-
       - GARCH.qmd
       - TS.qmd
       - conclusion.qmd
@@ -24,15 +23,24 @@ format:
     toc: true
 ---
 
-# Conclusion
+# Conclusions
 
 ## Big Picture Summary
 Currently, we have witnessed the great development of the technology and society but we actually paid less attention to the economy and personal living status. Moreover, there are many interconnections to these factors as shown below. For instance, economy affects our GDP and makes the GDP deflators changing over the year. As GDP changes, the personal incomes are also affected. With the income changed, household saving and affordability are influenced as well. There are many concerning issues arised with these changes as well as the Covid-19 impacts. Therefore, my objective is to discover impacts, patterns, correlations among these factors and find insightful results by analyzing the impacts with and without Covid-19.
 
 ![](./image/introduction/board.png)
 
+Different aspects and factors are analyzed on the housing sides, income sides, and the economic as shown below. One external factor is also included throughout the analysis: COVID-19 impact. By setting up cut-off date, I have utilized many models with or without the COVID-19 to make different predictions throughout the analysis to provide more thorough and effective analysis. Each section tells us important findings and comparisons. Overall, I found out that in the future, the impact of income disparity and housing affordability will keep increasing. Which can be a significant real-world issue in the future. Therefore, I believe that more methods can be conducted by adding more factors and models.
+
+<iframe src="./image/conclusion/B1.html" width="900" height="900"  style="width:100%; height:660px; border:none;"></iframe>
+
+
+
+# What Are Conclusions?
 
 Throughout this journey, I have discovered and found many interesting results based on the analysis. The most interesting apsect is that I found that there are different relations among the factors such as incomes, savings, housing prices, and GDP. And some of these relations can be very concerning regarding our future. For instance, throughout the years, the housing prices including home values, sale prices, and rental prices have increased gradually even with Covid impacts. However, the median household income stayed roughly constant or grew extremely slowly. I think such phenomenon is concerning because this means it is more and more difficult for people to afford a house as also proved by GINI index. 
+
+In addition to the main finding, there are another interesting results for different aspects and factors. On the income side, the household income, saving, and saving rate have certain correlation. It seems that while household saving increasing, the income remains roughly constant based on the median household income. This means that we tend to start save more for future instead of spending the money. On the housing side, the home value, sale price, and rental price have increased throughout the years. The economic as a whole also did not change too much throughout the year. Considering people starts to save more money for the future, this inflicts issues, based on the predictions, the housing prices will keep going up while the incomes and GDP will increase slowly. This means that the affordability of the housing will decrease as the disparity goes. Both income disparity and geographic disparity all play critical role in affecting and impacting the affordability of the housing.
 
 
 

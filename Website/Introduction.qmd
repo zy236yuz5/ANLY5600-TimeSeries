@@ -38,13 +38,23 @@ In order to bring a more comprehensive understanding of this topic, we must delv
 
 ![](./image/introduction/board.png)
 
+To be more specific, in order to thoroughly analyze the impact of incomes and housing affordability, we must consider various factors. On the income side, the household income, saving, and saving rate are very crucial to evaluate the household as a whole. Then the GINI index can dirctly show the equality distribution throughout the time. This can help us understand if there is disparity, if there is, is the disparity increasing or decreasing throughout the years?
+
+On housing side, different values such as housing prices, home values, rental prices, are cruical aspects to evaluate the housing affordability. In addition, in order to provide similar analysis for disparity, the geographic difference must be taken into account when analyzing disparity. Here, in USA, different regions, states, and even MSAs can tell us many informative knowledge. In addition, housing affordability index is another direct evaluaztor that can show the disparity eaily and clearly.
+
+However, we can not just simply analyze the income and housing separately. They are interconnected and influenced by the economic as a whole. Therefore, we must take the GDP into account to evaluate the impacts from the total economy. Then, the Implicit Price Deflator is another factor based on the change of GDP each year. This can reflect the increasing or decreasing of the economic, which can be connected to the analysis of income and housing. 
+
+In addition to these aspects, we also must take the world events into account. COVID-19 around 2020 in USA can be such event. It impacted our economy and thus must have influenced the incomes and housing prices. Therefore, throughout the analysis, before and after COVID-19 impacts will be added and connected to each factor. In this way, we can evaluate the impact more effectively.
+
+I am sure that there are also other factors that can have impacts on the analysis such as policy, environmental effect, and so on. However, throughout this project, economy related factors will be considered first. In future work, different factors can be connected.
 
 
-Mutiple datasets are analyzed thoroughly to provide insights and conclusions. Different methods such as Exploratory Data Analysis, ARMA Models, ARIMAX Models, Spectral Analysis and Filtering,, Financial Time Series Models, and Deep Learning methods are conducted to help me achieve the goal.
 
 ### Planed Model Using With COVID-19 Factors
 
 <iframe src="./image/conclusion/B1.html" width="900" height="900"  style="width:100%; height:660px; border:none;"></iframe>
+
+Mutiple datasets will be analyzed thoroughly to provide insights and conclusions. Different methods such as Exploratory Data Analysis, ARMA Models, ARIMAX Models, Spectral Analysis and Filtering, Financial Time Series Models, and Deep Learning methods will be conducted to help me achieve the goal.
 
 ### Guiding Questions:
 To guide the explorations, we have conducted some questions that would be answered using different analysis and dataset:
